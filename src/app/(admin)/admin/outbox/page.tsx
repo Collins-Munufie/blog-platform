@@ -63,15 +63,15 @@ export default function OutboxPage() {
   return (
     <div className="space-y-6">
       <AdminHeader
-        title="Outbox Notification &amp; Audit Logs"
-        description="Immutable audit trail of all emails, newsletter broadcasts, webhooks, and security notifications."
+        title="Outbox &amp; Dispatches"
+        description="History of sent newsletters, email replies, and notifications."
         action={
           <Button
             size="sm"
             onClick={handleBroadcastNewsletter}
-            className="gap-2 bg-[#20509b] text-white rounded-xl text-xs h-9 font-semibold"
+            className="gap-2 bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 rounded-xl text-xs h-9 font-semibold hover:opacity-90"
           >
-            <Send className="h-4 w-4" /> Trigger Weekly Broadcast
+            <Send className="h-4 w-4" /> Send Test Broadcast
           </Button>
         }
       />

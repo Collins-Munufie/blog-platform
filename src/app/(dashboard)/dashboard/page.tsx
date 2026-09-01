@@ -4,19 +4,19 @@ import {
   FileText,
   ArrowRight,
   Eye,
-  CheckCircle2,
+  Heart,
   Clock,
-  Sparkles,
-  ExternalLink,
   Edit,
+  ExternalLink,
 } from "lucide-react";
 import { getPosts } from "@/lib/api/posts";
 import { getAnalyticsSummary } from "@/lib/api/analytics";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { AnalyticsChart } from "@/components/dashboard/AnalyticsChart";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
+
+export const revalidate = 0;
 
 export default async function DashboardPage() {
   const [allPosts, analytics] = await Promise.all([
@@ -30,59 +30,52 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <DashboardHeader
-        title="Creator Studio & Analytics"
-        description="Monitor real reader engagement, publish drafts, and maintain your technical catalog."
+        title="Studio Overview"
+        description="Your writing dashboard and audience statistics."
       />
 
-      {/* Real Dynamic Analytics Overview */}
+      {/* Analytics Overview */}
       <AnalyticsChart data={analytics} />
 
-      {/* Drafts Queue & Top Performing Articles */}
+      {/* Drafts & Published Stories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Working Drafts Queue */}
-        <div className="card-simple p-6 space-y-4">
+        {/* Working Drafts */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Working Drafts ({recentDrafts.length})
+              <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 font-heading">
+                Drafts in Progress
               </h3>
-              <p className="text-xs text-slate-500">Unpublished stories in progress</p>
+              <p className="text-xs text-stone-500">
+                {recentDrafts.length} unpublished draft{recentDrafts.length === 1 ? "" : "s"}
+              </p>
             </div>
-            <Link href="/dashboard/posts/new">
-              <Button size="sm" variant="subtle" className="gap-1.5 text-xs h-8">
-                <PenSquare className="h-3.5 w-3.5" /> New Draft
-              </Button>
+            <Link
+              href="/dashboard/posts/new"
+              className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+            >
+              + New draft
             </Link>
           </div>
 
-          <div className="space-y-3 pt-1">
+          <div className="divide-y divide-stone-100 dark:divide-stone-800">
             {recentDrafts.length === 0 ? (
-              <div className="text-center py-10 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800">
-                <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto mb-2 opacity-80" />
-                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  All caught up! No pending drafts.
-                </p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Click &ldquo;New Draft&rdquo; to start drafting your next article.
-                </p>
-              </div>
+              <p className="py-6 text-xs text-stone-400 text-center">No drafts in progress.</p>
             ) : (
               recentDrafts.map((draft) => (
-                <div
-                  key={draft.id}
-                  className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-3 group hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
-                >
-                  <div className="space-y-1 min-w-0">
-                    <h4 className="text-xs font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 truncate">
+                <div key={draft.id} className="py-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate">
                       {draft.title}
-                    </h4>
-                    <p className="text-[11px] text-slate-400">
-                      {draft.readingTimeMinutes} min read • Updated {formatDate(draft.publishedAt)}
+                    </p>
+                    <p className="text-[11px] text-stone-500">
+                      {draft.category.name} • {draft.readingTimeMinutes} min read
                     </p>
                   </div>
                   <Link href={`/dashboard/posts/${draft.id}/edit`}>
-                    <Button size="sm" variant="outline" className="text-xs h-7 px-3 shrink-0">
-                      Edit
+                    <Button variant="outline" size="sm" className="h-8 text-xs gap-1 rounded-xl">
+                      <Edit className="h-3.5 w-3.5" />
+                      <span>Edit</span>
                     </Button>
                   </Link>
                 </div>
@@ -91,53 +84,53 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Top Published Articles */}
-        <div className="card-simple p-6 space-y-4">
+        {/* Recently Published */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Recent Publications
+              <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 font-heading">
+                Recent Published Stories
               </h3>
-              <p className="text-xs text-slate-500">Live articles receiving traffic</p>
+              <p className="text-xs text-stone-500">
+                {recentPublished.length} live stories
+              </p>
             </div>
             <Link
               href="/dashboard/posts"
-              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
             >
-              All articles ({allPosts.length}) <ArrowRight className="h-3 w-3" />
+              View all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
 
-          <div className="space-y-3 pt-1">
+          <div className="divide-y divide-stone-100 dark:divide-stone-800">
             {recentPublished.map((post) => (
-              <div
-                key={post.id}
-                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-3 group hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
-              >
-                <div className="space-y-1 min-w-0">
-                  <h4 className="text-xs font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 truncate">
+              <div key={post.id} className="py-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-stone-900 dark:text-white truncate">
                     {post.title}
-                  </h4>
-                  <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                    <Badge variant="indigo" size="sm">
-                      {post.category.name}
-                    </Badge>
-                    <span>•</span>
+                  </p>
+                  <p className="text-[11px] text-stone-500 flex items-center gap-2">
                     <span>{formatDate(post.publishedAt)}</span>
-                  </div>
+                    <span>•</span>
+                    <span className="flex items-center gap-0.5">
+                      <Eye className="h-3 w-3" /> {formatCompactNumber(post.views)}
+                    </span>
+                    <span className="flex items-center gap-0.5">
+                      <Heart className="h-3 w-3 text-rose-500" /> {formatCompactNumber(post.likes)}
+                    </span>
+                  </p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="flex items-center gap-1 text-xs text-slate-500 font-mono">
-                    <Eye className="h-3 w-3 text-blue-500" />
-                    {formatCompactNumber(post.views)}
-                  </span>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    target="_blank"
-                    className="p-1 rounded text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                    title="View live"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" />
+                <div className="flex items-center gap-1.5">
+                  <Link href={`/blog/${post.slug}`} target="_blank">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-xl" title="View story">
+                      <ExternalLink className="h-3.5 w-3.5 text-stone-500" />
+                    </Button>
+                  </Link>
+                  <Link href={`/dashboard/posts/${post.id}/edit`}>
+                    <Button variant="outline" size="sm" className="h-8 text-xs rounded-xl">
+                      Edit
+                    </Button>
                   </Link>
                 </div>
               </div>

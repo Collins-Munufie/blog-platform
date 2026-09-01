@@ -44,8 +44,8 @@ export default function HelpdeskPage() {
   return (
     <div className="space-y-6">
       <AdminHeader
-        title="Editorial Helpdesk &amp; Reader Support"
-        description="Manage article correction requests, technical inquiries, and sponsorship communications."
+        title="Reader Messages &amp; Feedback"
+        description="Reply to reader inquiries, feedback, and story suggestions."
       />
 
       {/* Filter & Search Bar */}

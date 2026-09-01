@@ -52,8 +52,8 @@ export default function BadgesPage() {
   return (
     <div className="space-y-8">
       <AdminHeader
-        title="Author ID &amp; Press Badges"
-        description="Issue verified contributor identification passes with cryptographic verification QR codes and printable badges."
+        title="Author ID Badges"
+        description="Issue and manage verified contributor ID passes."
         action={
           <Button
             size="sm"

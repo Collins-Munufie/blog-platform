@@ -44,8 +44,8 @@ export default function ApplicationsPage() {
   return (
     <div className="space-y-6">
       <AdminHeader
-        title="Writer &amp; Contributor Applications"
-        description="Vet technical domain expertise, review proposed article pitches, and issue author badges."
+        title="Writer Applications"
+        description="Review writer applications and proposed topics."
       />
 
       {/* Filter & Search Bar */}
