@@ -3,34 +3,51 @@ import { MOCK_POSTS, MOCK_CATEGORIES, MOCK_TAGS, MOCK_AUTHORS } from "../mock-da
 import { calculateReadingTime, slugify } from "../utils";
 
 const STORAGE_KEY = "devlog_posts_store";
+const DEFAULT_COVER = "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80";
 
-// Use globalThis to persist in-memory across Server Component requests in Node.js runtime
+function sanitizeCoverImage(url?: string): string {
+  if (!url || url.includes("photo-1526374965328-7f61d4dc18c5")) {
+    return DEFAULT_COVER;
+  }
+  return url;
+}
+
 declare global {
   var __GLOBAL_POSTS__: Post[] | undefined;
 }
 
-function getGlobalPosts(): Post[] {
+function getInitialPosts(): Post[] {
+  return MOCK_POSTS.map((p) => ({
+    ...p,
+    coverImage: sanitizeCoverImage(p.coverImage),
+  }));
+}
+
+function getStoredPosts(): Post[] {
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored) as Post[];
+        return parsed.map((p) => ({
+          ...p,
+          coverImage: sanitizeCoverImage(p.coverImage),
+        }));
       }
     } catch {}
-    return [...MOCK_POSTS];
+    return getInitialPosts();
   }
 
   if (!globalThis.__GLOBAL_POSTS__) {
-    globalThis.__GLOBAL_POSTS__ = [...MOCK_POSTS];
+    globalThis.__GLOBAL_POSTS__ = getInitialPosts();
   }
   return globalThis.__GLOBAL_POSTS__;
 }
 
-function saveGlobalPosts(posts: Post[]) {
+function saveStoredPosts(posts: Post[]) {
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-      // Notify other components on client
       window.dispatchEvent(new Event("posts_updated"));
     } catch {}
   } else {
@@ -48,13 +65,12 @@ export interface GetPostsParams {
 }
 
 export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
-  const posts = getGlobalPosts();
+  const posts = getStoredPosts();
   let result = [...posts];
 
   if (params.status && params.status !== "all") {
     result = result.filter((p) => p.status === params.status);
   } else if (!params.status) {
-    // Default to published only for public reader queries
     result = result.filter((p) => p.status === "published");
   }
 
@@ -80,7 +96,6 @@ export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
     );
   }
 
-  // Sort descending by publishedAt / createdAt
   result.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
   if (params.limit) {
@@ -91,28 +106,28 @@ export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const posts = getGlobalPosts();
+  const posts = getStoredPosts();
   const post = posts.find((p) => p.slug === slug);
   return post ? { ...post } : null;
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
-  const posts = getGlobalPosts();
+  const posts = getStoredPosts();
   const post = posts.find((p) => p.id === id);
   return post ? { ...post } : null;
 }
 
 export async function getFeaturedPosts(): Promise<Post[]> {
-  const posts = getGlobalPosts();
+  const posts = getStoredPosts();
   return posts.filter((p) => p.featured && p.status === "published");
 }
 
 export async function createPost(input: CreatePostInput): Promise<Post> {
-  const posts = getGlobalPosts();
-
+  const cleanCover = sanitizeCoverImage(input.coverImage);
+  const posts = getStoredPosts();
   const category = MOCK_CATEGORIES.find((c) => c.id === input.categoryId) || MOCK_CATEGORIES[0];
   const tags = MOCK_TAGS.filter((t) => input.tagIds?.includes(t.id));
-  const author = MOCK_AUTHORS.find((a) => a.id === input.authorId) || MOCK_AUTHORS[0];
+  const author = MOCK_AUTHORS[0];
 
   const newPost: Post = {
     id: `post-${Date.now()}`,
@@ -120,9 +135,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     title: input.title,
     excerpt: input.excerpt || input.content.slice(0, 140) + "...",
     content: input.content,
-    coverImage:
-      input.coverImage ||
-      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80",
+    coverImage: cleanCover,
     category,
     tags,
     author,
@@ -138,24 +151,25 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
   };
 
   const updated = [newPost, ...posts];
-  saveGlobalPosts(updated);
+  saveStoredPosts(updated);
 
-  // If in browser, also sync with API endpoint in background
   if (typeof window !== "undefined") {
-    try {
-      fetch("/api/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newPost),
-      }).catch(() => {});
-    } catch {}
+    fetch("/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newPost),
+    }).catch(() => {});
   }
 
   return newPost;
 }
 
 export async function updatePost(id: string, updates: Partial<Post>): Promise<Post> {
-  const posts = getGlobalPosts();
+  if (updates.coverImage) {
+    updates.coverImage = sanitizeCoverImage(updates.coverImage);
+  }
+
+  const posts = getStoredPosts();
   const index = posts.findIndex((p) => p.id === id);
   if (index === -1) {
     throw new Error(`Post not found with ID ${id}`);
@@ -171,42 +185,42 @@ export async function updatePost(id: string, updates: Partial<Post>): Promise<Po
   };
 
   posts[index] = updatedPost;
-  saveGlobalPosts(posts);
+  saveStoredPosts(posts);
 
   if (typeof window !== "undefined") {
-    try {
-      fetch(`/api/posts/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedPost),
-      }).catch(() => {});
-    } catch {}
+    fetch(`/api/posts/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedPost),
+    }).catch(() => {});
   }
 
   return updatedPost;
 }
 
 export async function deletePost(id: string): Promise<boolean> {
-  const posts = getGlobalPosts();
+  const posts = getStoredPosts();
   const initialLength = posts.length;
   const filtered = posts.filter((p) => p.id !== id);
-  saveGlobalPosts(filtered);
+  saveStoredPosts(filtered);
 
   if (typeof window !== "undefined") {
-    try {
-      fetch(`/api/posts/${id}`, { method: "DELETE" }).catch(() => {});
-    } catch {}
+    fetch(`/api/posts/${id}`, { method: "DELETE" }).catch(() => {});
   }
 
   return filtered.length < initialLength;
 }
 
 export async function toggleLikePost(id: string): Promise<number> {
-  const posts = getGlobalPosts();
+  const posts = getStoredPosts();
   const post = posts.find((p) => p.id === id);
   if (post) {
     post.likes = (post.likes || 0) + 1;
-    saveGlobalPosts(posts);
+    saveStoredPosts(posts);
+
+    if (typeof window !== "undefined") {
+      fetch(`/api/posts/${id}/like`, { method: "POST" }).catch(() => {});
+    }
     return post.likes;
   }
   return 0;

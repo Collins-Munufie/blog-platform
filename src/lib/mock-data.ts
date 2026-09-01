@@ -132,7 +132,7 @@ export const MOCK_SERIES: Series[] = [
     slug: 'silicon-accra-2026',
     title: 'Silicon Accra: Field Notes & Essays',
     description: 'An honest look at building software from Ghana: internet reliability, hiring engineering talent, and funding realities.',
-    coverImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80',
+    coverImage: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80',
     postCount: 4,
   },
   {
@@ -216,7 +216,7 @@ If you are thinking about spending a season building from Ghana, do it. The wate
 
 — **Khophi**
     `,
-    coverImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80',
+    coverImage: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80',
     category: MOCK_CATEGORIES[0],
     tags: [MOCK_TAGS[0], MOCK_TAGS[3], MOCK_TAGS[7]],
     author: MOCK_AUTHORS[0],
@@ -366,8 +366,8 @@ Finding a cafe where the music isn't blaring and the power outlets actually work
 export const MOCK_MEDIA_ITEMS: MediaItem[] = [
   {
     id: 'media-1',
-    name: 'osu-street-view-evening.jpg',
-    url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80',
+    name: 'osu-tech-workspace.jpg',
+    url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80',
     size: '1.4 MB',
     dimensions: '1920x1080',
     category: 'Accra City',

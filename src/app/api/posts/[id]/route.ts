@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
-import { updatePost, deletePost, getPostById } from "@/lib/api/posts";
+import { db } from "@/lib/server/db";
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const post = await getPostById(params.id);
+  let post = db.getPostById(params.id);
+  if (!post) {
+    post = db.getPostBySlug(params.id);
+  }
   if (!post) {
     return NextResponse.json({ error: "Post not found" }, { status: 404 });
   }
@@ -18,7 +21,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const updated = await updatePost(params.id, body);
+    const updated = db.updatePost(params.id, body);
     return NextResponse.json(updated);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });
@@ -29,6 +32,6 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const deleted = await deletePost(params.id);
+  const deleted = db.deletePost(params.id);
   return NextResponse.json({ success: deleted });
 }

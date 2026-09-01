@@ -13,8 +13,19 @@ interface LivePostGridProps {
   initialFeatured?: Post | null;
 }
 
+const DEFAULT_COVER = "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80";
+
+function sanitizePosts(items: Post[]): Post[] {
+  return items.map((p) => ({
+    ...p,
+    coverImage: p.coverImage?.includes("photo-1526374965328-7f61d4dc18c5")
+      ? DEFAULT_COVER
+      : p.coverImage || DEFAULT_COVER,
+  }));
+}
+
 export function LivePostGrid({ initialPosts, initialFeatured }: LivePostGridProps) {
-  const [posts, setPosts] = React.useState<Post[]>(initialPosts);
+  const [posts, setPosts] = React.useState<Post[]>(sanitizePosts(initialPosts));
 
   React.useEffect(() => {
     // Sync latest posts from client store / localStorage immediately on mount
@@ -22,7 +33,7 @@ export function LivePostGrid({ initialPosts, initialFeatured }: LivePostGridProp
       try {
         const latest = await getPosts({ status: "published" });
         if (latest && latest.length > 0) {
-          setPosts(latest);
+          setPosts(sanitizePosts(latest));
         }
       } catch {}
     };

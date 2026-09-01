@@ -54,7 +54,7 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
   const [excerpt, setExcerpt] = React.useState(initialPost?.excerpt || "");
   const [coverImage, setCoverImage] = React.useState(
     initialPost?.coverImage ||
-      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80"
+      "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80"
   );
   const [status, setStatus] = React.useState<PostStatus>(
     initialPost?.status || "published"
