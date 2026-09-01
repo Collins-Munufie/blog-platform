@@ -17,7 +17,7 @@ import {
   FilePlus,
 } from "lucide-react";
 import { Post, PostStatus } from "@/lib/types";
-import { deletePost, updatePost } from "@/lib/api/posts";
+import { deletePost, updatePost, getPosts } from "@/lib/api/posts";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
@@ -31,6 +31,26 @@ export function PostDataTable({ initialPosts }: { initialPosts: Post[] }) {
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
   const [updatingStatusId, setUpdatingStatusId] = React.useState<string | null>(null);
   const { toast } = useToast();
+
+  React.useEffect(() => {
+    const sync = async () => {
+      try {
+        const latest = await getPosts({ status: "all" });
+        if (latest) {
+          setPosts(latest);
+        }
+      } catch {}
+    };
+    sync();
+
+    window.addEventListener("posts_updated", sync);
+    window.addEventListener("storage", sync);
+
+    return () => {
+      window.removeEventListener("posts_updated", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
 
   const handleToggleStatus = async (post: Post) => {
     const nextStatus: PostStatus = post.status === "published" ? "draft" : "published";

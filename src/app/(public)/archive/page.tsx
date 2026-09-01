@@ -4,7 +4,8 @@ import { getPosts } from "@/lib/api/posts";
 import { getCategories, getTags } from "@/lib/api/categories";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function ArchivePage() {
   const [posts, categories, tags] = await Promise.all([

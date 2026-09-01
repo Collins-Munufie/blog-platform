@@ -33,6 +33,7 @@ import { calculateReadingTime, slugify } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { ArticleContent } from "@/components/public/ArticleContent";
 import { PostSettingsModal } from "./PostSettingsModal";
+import { InsertImageModal } from "./InsertImageModal";
 import { useToast } from "@/components/ui/Toast";
 
 interface EditorProps {
@@ -76,6 +77,7 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [allTags, setAllTags] = React.useState<Tag[]>([]);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isPublishing, setIsPublishing] = React.useState(false);
 
@@ -371,9 +373,9 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
             </button>
             <button
               type="button"
-              onClick={() => insertMarkdown("![alt text](", ")", "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80")}
+              onClick={() => setIsImageModalOpen(true)}
               className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0 hover:text-amber-600"
-              title="Image markdown"
+              title="Insert Image (Upload or URL)"
             >
               <ImageIcon className="h-4 w-4" />
             </button>
@@ -497,6 +499,15 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
         setMetaTitle={setMetaTitle}
         metaDescription={metaDescription}
         setMetaDescription={setMetaDescription}
+      />
+
+      {/* Insert Image Modal */}
+      <InsertImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        onInsert={(mdImage) => {
+          insertMarkdown("", "", mdImage);
+        }}
       />
     </div>
   );
