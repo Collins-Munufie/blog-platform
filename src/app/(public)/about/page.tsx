@@ -1,85 +1,143 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Twitter, Github, Linkedin, MessageCircle, Mail, MapPin, Sparkles, CheckCircle2 } from "lucide-react";
+import {
+  Twitter,
+  Github,
+  MessageCircle,
+  Mail,
+  MapPin,
+  Coffee,
+  Cpu,
+  Heart,
+  Compass,
+  ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+    <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-12">
       {/* Header Profile */}
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 p-8 rounded-3xl card-lift bg-white dark:bg-[#08214e]">
-        <Image
-          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80"
-          alt="Khophi"
-          width={120}
-          height={120}
-          className="rounded-3xl object-cover ring-4 ring-[#f59e0b] shadow-xl"
-        />
-
-        <div className="space-y-3 text-center sm:text-left flex-1">
+      <div className="space-y-6">
+        <div className="flex items-center gap-5">
+          <Image
+            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80"
+            alt="Khophi"
+            width={88}
+            height={88}
+            priority
+            className="rounded-3xl object-cover ring-2 ring-amber-500 shadow-md"
+          />
           <div className="space-y-1">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#fff9eb] dark:bg-[#f59e0b]/10 text-[#d97706] dark:text-[#f59e0b] border border-[#ffe299] dark:border-[#f59e0b]/20">
-              <Sparkles className="h-3.5 w-3.5" /> Founder &amp; Lead Storyteller
-            </span>
-            <h1 className="text-3xl font-black text-[#08214e] dark:text-white font-heading">
-              Khophi <span className="text-base text-[#93a0b4] font-mono">(@khophi_the_blogger)</span>
+            <h1 className="text-2xl sm:text-4xl font-black text-stone-900 dark:text-stone-100 font-heading">
+              Khophi
             </h1>
-            <p className="text-xs text-[#20509b] dark:text-[#8ab1e3] font-semibold flex items-center justify-center sm:justify-start gap-1">
-              <MapPin className="h-3.5 w-3.5" /> Accra, Ghana 🇬🇭
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 font-medium">
+              Software Engineer &amp; Writer based in <span className="font-bold text-stone-900 dark:text-white">Accra, Ghana 🇬🇭</span>
+            </p>
+            <div className="flex items-center gap-3 text-xs text-stone-500 pt-1">
+              <a
+                href="https://twitter.com/khophi_blogger"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-stone-900 dark:hover:text-white flex items-center gap-1 font-semibold"
+              >
+                <Twitter className="h-3.5 w-3.5 text-sky-500" /> @khophi_blogger
+              </a>
+              <span>•</span>
+              <a
+                href="https://wa.me/233240000000"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-stone-900 dark:hover:text-white flex items-center gap-1 text-[#25D366] font-semibold"
+              >
+                <MessageCircle className="h-3.5 w-3.5 fill-current" /> WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* First Person Narrative */}
+        <div className="space-y-4 text-stone-800 dark:text-stone-200 text-sm sm:text-base leading-relaxed pt-4 border-t border-stone-200 dark:border-stone-800">
+          <p>
+            Hey! Thanks for stopping by my corner of the internet.
+          </p>
+          <p>
+            I’m a software architect and writer. I grew up in Ghana, studied computer science, spent a few years working with remote fintech teams across Europe, and eventually moved back to Accra to build full-time.
+          </p>
+          <p>
+            I started <strong className="text-stone-900 dark:text-white">khophi_the_blogger</strong> because most coverage of African tech either felt like corporate PR or distant theoretical analysis. I wanted a space to write honest, ground-truth essays on what building software here actually looks like — from Mobile Money (MoMo) settlement quirks to the thriving music and culture scene in Osu and Tema.
+          </p>
+        </div>
+      </div>
+
+      {/* What I Write About */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 font-heading">
+          What You’ll Find Here
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 space-y-1.5 shadow-sm">
+            <h3 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              <Cpu className="h-4 w-4 text-amber-600" />
+              <span>Real African Tech &amp; Fintech</span>
+            </h3>
+            <p className="text-stone-600 dark:text-stone-300 leading-relaxed">
+              Dissecting Mobile Money APIs, GhIPSS interoperability, Starlink deployments, and distributed systems.
             </p>
           </div>
 
-          <p className="text-xs sm:text-sm text-[#2f3b4d] dark:text-slate-300 leading-relaxed">
-            Software architect, tech journalist, and cultural commentator documenting West Africa’s digital transformation, mobile money innovations, Afrobeats economics, and Ghanaian lifestyle.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 pt-2">
-            <a
-              href="https://wa.me/233240000000"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#25D366] text-slate-950 font-bold text-xs shadow-md"
-            >
-              <MessageCircle className="h-3.5 w-3.5 fill-current" /> WhatsApp Khophi
-            </a>
-            <a
-              href="https://twitter.com/khophi_blogger"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[#08214e] dark:text-white font-semibold text-xs"
-            >
-              <Twitter className="h-3.5 w-3.5" /> @khophi_blogger
-            </a>
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 space-y-1.5 shadow-sm">
+            <h3 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              <Heart className="h-4 w-4 text-rose-600" />
+              <span>Culture, Music &amp; Accra Life</span>
+            </h3>
+            <p className="text-stone-600 dark:text-stone-300 leading-relaxed">
+              Behind the scenes in Tema home studios, Afrobeats streaming economics, and living in Accra.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Editorial Standards */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-[#08214e] dark:text-white font-heading">
-          Editorial Mission &amp; Standards
+      {/* My Workstation & Hardware Setup */}
+      <div className="p-6 rounded-3xl bg-stone-100 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 space-y-3">
+        <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 font-heading flex items-center gap-2">
+          <Coffee className="h-4 w-4 text-amber-600" />
+          <span>My Daily Workstation in Osu</span>
         </h2>
+        <ul className="space-y-1.5 text-xs text-stone-600 dark:text-stone-300 list-disc list-inside">
+          <li><strong>Computer:</strong> MacBook Pro M3 Max (36GB RAM)</li>
+          <li><strong>Power:</strong> 5kWh Lithium Solar Hybrid Backup (Zero-downtime during outages)</li>
+          <li><strong>Connectivity:</strong> 200Mbps Fiber + Starlink Mini failover</li>
+          <li><strong>Editor:</strong> VS Code with Tokyo Night + JetBrains Mono</li>
+        </ul>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="card-lift p-5 rounded-2xl space-y-2">
-            <div className="flex items-center gap-2 font-bold text-sm text-[#08214e] dark:text-white">
-              <CheckCircle2 className="h-4 w-4 text-[#f59e0b]" />
-              <span>Ground Truth in African Tech</span>
-            </div>
-            <p className="text-xs text-[#2f3b4d] dark:text-slate-300 leading-relaxed">
-              We interview real founders, review actual transaction volume data, and demystify financial infrastructure across Ghana and Africa.
-            </p>
-          </div>
-
-          <div className="card-lift p-5 rounded-2xl space-y-2">
-            <div className="flex items-center gap-2 font-bold text-sm text-[#08214e] dark:text-white">
-              <CheckCircle2 className="h-4 w-4 text-[#f59e0b]" />
-              <span>Multilingual &amp; Accessible</span>
-            </div>
-            <p className="text-xs text-[#2f3b4d] dark:text-slate-300 leading-relaxed">
-              Bridging English analysis with Ghanaian indigenous languages (Twi, Ga, Ewe, Hausa) to ensure inclusive digital literacy.
-            </p>
-          </div>
+      {/* Get in Touch */}
+      <div className="space-y-3 pt-2">
+        <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 font-heading">
+          Get in Touch
+        </h2>
+        <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+          I read every message. If you’re building something interesting in Accra, want to discuss an essay, or just want to grab a coffee in Labone, send me a note:
+        </p>
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          <a
+            href="https://wa.me/233240000000"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] text-stone-950 font-bold text-xs shadow-sm hover:bg-[#20bd5a] transition-colors"
+          >
+            <MessageCircle className="h-4 w-4 fill-stone-950" />
+            <span>Chat on WhatsApp</span>
+          </a>
+          <a
+            href="mailto:khophi@khophitheblogger.com"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold text-xs shadow-sm hover:opacity-90 transition-opacity"
+          >
+            <Mail className="h-4 w-4" />
+            <span>Email Khophi</span>
+          </a>
         </div>
       </div>
     </div>

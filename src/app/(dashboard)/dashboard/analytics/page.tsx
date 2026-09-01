@@ -9,7 +9,7 @@ export default async function DashboardAnalyticsPage() {
   const analytics = await getAnalyticsSummary();
 
   return (
-    <div className="p-6 sm:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="space-y-8">
       <DashboardHeader
         title="Audience & Growth Analytics"
         description="Comprehensive readership metrics, traffic velocity, and content distribution insights."

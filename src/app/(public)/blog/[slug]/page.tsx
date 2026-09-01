@@ -178,41 +178,46 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               commentsCount={comments.length}
             />
 
-            {/* Author Bio Box */}
-            <div className="my-10 p-6 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center gap-5 shadow-sm">
+            {/* Author Bio & Sign-off Box */}
+            <div className="my-10 p-6 rounded-3xl bg-stone-100 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row items-start sm:items-center gap-5 shadow-sm">
               <Image
                 src={post.author.avatar}
                 alt={post.author.name}
                 width={64}
                 height={64}
-                className="rounded-full object-cover ring-4 ring-slate-100 dark:ring-slate-800"
+                className="rounded-2xl object-cover ring-2 ring-amber-500 shadow-md"
               />
               <div className="space-y-1.5 flex-1">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                  <h4 className="text-base font-bold text-stone-900 dark:text-white font-heading">
                     Written by {post.author.name}
                   </h4>
-                  <div className="flex items-center gap-2 text-slate-400">
+                  <div className="flex items-center gap-2 text-stone-400">
                     {post.author.twitter && (
-                      <a href={post.author.twitter} target="_blank" rel="noreferrer" className="hover:text-primary-600">
+                      <a href={post.author.twitter} target="_blank" rel="noreferrer" className="hover:text-amber-600 transition-colors">
                         <Twitter className="h-4 w-4" />
                       </a>
                     )}
                     {post.author.github && (
-                      <a href={post.author.github} target="_blank" rel="noreferrer" className="hover:text-primary-600">
+                      <a href={post.author.github} target="_blank" rel="noreferrer" className="hover:text-amber-600 transition-colors">
                         <Github className="h-4 w-4" />
-                      </a>
-                    )}
-                    {post.author.website && (
-                      <a href={post.author.website} target="_blank" rel="noreferrer" className="hover:text-primary-600">
-                        <Globe className="h-4 w-4" />
                       </a>
                     )}
                   </div>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
                   {post.author.bio}
                 </p>
+                <div className="pt-2 flex items-center gap-3 text-xs">
+                  <a
+                    href="https://wa.me/233240000000"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-bold text-[#25D366] hover:underline inline-flex items-center gap-1"
+                  >
+                    Send Khophi a thought on WhatsApp →
+                  </a>
+                </div>
               </div>
             </div>
 

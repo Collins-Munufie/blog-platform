@@ -39,7 +39,7 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
         const next = saved.filter((id) => id !== post.id);
         localStorage.setItem("devlog_saved_bookmarks", JSON.stringify(next));
         setIsBookmarked(false);
-        toast({ title: "Removed from Reading List", type: "info" });
+        toast({ title: "Removed from reading list", type: "info" });
       } else {
         const next = [...saved, post.id];
         localStorage.setItem("devlog_saved_bookmarks", JSON.stringify(next));
@@ -63,16 +63,16 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
 
   if (variant === "horizontal") {
     return (
-      <article className="group card-lift flex flex-col sm:flex-row gap-5 p-5 rounded-2xl relative">
+      <article className="group card-simple flex flex-col sm:flex-row gap-5 p-5 rounded-2xl relative">
         <Link
           href={`/blog/${post.slug}`}
-          className="relative aspect-[16/10] sm:w-56 sm:aspect-[4/3] rounded-xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800"
+          className="relative aspect-[16/10] sm:w-52 sm:aspect-[4/3] rounded-xl overflow-hidden shrink-0 bg-stone-100 dark:bg-stone-800"
         >
           <Image
             src={post.coverImage}
             alt={post.title}
             fill
-            sizes="(max-width: 640px) 100vw, 240px"
+            sizes="(max-width: 640px) 100vw, 220px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </Link>
@@ -82,12 +82,12 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5">
                 <Link href={`/categories?slug=${post.category.slug}`}>
-                  <span className="brand-tag-gold text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                  <span className="editorial-tag text-[11px] font-bold px-2.5 py-0.5 rounded-full">
                     {post.category.name}
                   </span>
                 </Link>
                 {post.series && (
-                  <span className="text-[10px] font-bold text-[#20509b] dark:text-[#8ab1e3] bg-[#eef3fa] dark:bg-[#12346e] px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded-full flex items-center gap-1">
                     <Layers className="h-2.5 w-2.5" /> Series
                   </span>
                 )}
@@ -103,7 +103,7 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
                 </button>
                 <button
                   onClick={handleBookmarkToggle}
-                  className={`p-1 rounded-lg text-slate-400 hover:text-[#08214e] dark:hover:text-white ${
+                  className={`p-1 rounded-lg text-stone-400 hover:text-stone-900 dark:hover:text-white ${
                     isBookmarked ? "text-[#f59e0b]" : ""
                   }`}
                   title="Bookmark"
@@ -114,26 +114,26 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
             </div>
 
             <Link href={`/blog/${post.slug}`}>
-              <h3 className="text-base font-bold text-[#08214e] dark:text-white group-hover:text-[#20509b] dark:group-hover:text-[#8ab1e3] transition-colors line-clamp-2 font-heading">
+              <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2 font-heading leading-snug">
                 {post.title}
               </h3>
             </Link>
 
-            <p className="text-xs text-[#2f3b4d] dark:text-slate-300 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-stone-600 dark:text-stone-300 line-clamp-2 leading-relaxed">
               {post.excerpt}
             </p>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-[#e2e8f2] dark:border-[#1e3a6a] text-xs text-[#93a0b4]">
+          <div className="flex items-center justify-between pt-2 border-t border-stone-100 dark:border-stone-800 text-xs text-stone-500">
             <Link
               href={`/author/${post.author.id}`}
-              className="hover:text-[#08214e] dark:hover:text-white transition-colors font-semibold"
+              className="hover:text-stone-900 dark:hover:text-white transition-colors font-medium"
             >
               {post.author.name} • {formatDate(post.publishedAt)}
             </Link>
             <div className="flex items-center gap-3 font-mono text-xs">
               <span className="flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5 text-[#20509b]" /> {formatCompactNumber(post.views)}
+                <Eye className="h-3.5 w-3.5 text-stone-400" /> {formatCompactNumber(post.views)}
               </span>
               <span className="flex items-center gap-1">
                 <Heart className="h-3.5 w-3.5 text-rose-500" /> {formatCompactNumber(post.likes)}
@@ -146,12 +146,12 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
   }
 
   return (
-    <article className="group card-lift flex flex-col justify-between overflow-hidden rounded-2xl relative">
+    <article className="group card-simple flex flex-col justify-between overflow-hidden rounded-2xl relative">
       <div>
         {/* Cover Image */}
         <Link
           href={`/blog/${post.slug}`}
-          className="relative aspect-[16/10] overflow-hidden block bg-slate-100 dark:bg-slate-800"
+          className="relative aspect-[16/10] overflow-hidden block bg-stone-100 dark:bg-stone-800"
         >
           <Image
             src={post.coverImage}
@@ -161,11 +161,11 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute top-3 left-3 flex items-center gap-1.5">
-            <span className="brand-tag-gold text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+            <span className="editorial-tag text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm bg-white/90 dark:bg-stone-900/90">
               {post.category.name}
             </span>
             {post.series && (
-              <span className="text-[10px] font-bold bg-[#041536]/80 text-[#f59e0b] px-2 py-0.5 rounded-full backdrop-blur-sm">
+              <span className="text-[10px] font-bold bg-stone-900/80 text-[#f59e0b] px-2 py-0.5 rounded-full backdrop-blur-sm">
                 Series
               </span>
             )}
@@ -174,15 +174,15 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
           <div className="absolute top-3 right-3 flex items-center gap-1">
             <button
               onClick={handleWhatsAppShare}
-              className="p-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 text-[#25D366] shadow-sm backdrop-blur-sm hover:scale-105 transition-all"
+              className="p-1.5 rounded-full bg-white/90 dark:bg-stone-900/90 text-[#25D366] shadow-sm backdrop-blur-sm hover:scale-105 transition-all"
               title="Share on WhatsApp"
             >
               <MessageCircle className="h-3.5 w-3.5 fill-current" />
             </button>
             <button
               onClick={handleBookmarkToggle}
-              className={`p-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 shadow-sm backdrop-blur-sm transition-all hover:scale-105 ${
-                isBookmarked ? "text-[#f59e0b]" : "text-slate-600 dark:text-slate-300"
+              className={`p-1.5 rounded-full bg-white/90 dark:bg-stone-900/90 shadow-sm backdrop-blur-sm transition-all hover:scale-105 ${
+                isBookmarked ? "text-[#f59e0b]" : "text-stone-600 dark:text-stone-300"
               }`}
               title={isBookmarked ? "Remove bookmark" : "Save for later"}
             >
@@ -192,8 +192,8 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
         </Link>
 
         {/* Card Body */}
-        <div className="p-5 space-y-3">
-          <div className="flex items-center gap-2 text-xs text-[#93a0b4]">
+        <div className="p-5 space-y-2.5">
+          <div className="flex items-center gap-2 text-xs text-stone-500">
             <Clock className="h-3.5 w-3.5" />
             <span>{post.readingTimeMinutes} min read</span>
             <span>•</span>
@@ -201,12 +201,12 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
           </div>
 
           <Link href={`/blog/${post.slug}`}>
-            <h3 className="text-base sm:text-lg font-bold text-[#08214e] dark:text-white group-hover:text-[#20509b] dark:group-hover:text-[#8ab1e3] transition-colors line-clamp-2 font-heading">
+            <h3 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2 font-heading leading-snug">
               {post.title}
             </h3>
           </Link>
 
-          <p className="text-xs text-[#2f3b4d] dark:text-slate-300 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-stone-600 dark:text-stone-300 line-clamp-2 leading-relaxed">
             {post.excerpt}
           </p>
         </div>
@@ -214,7 +214,7 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
 
       {/* Footer Info */}
       <div className="p-5 pt-0">
-        <div className="flex items-center justify-between border-t border-[#e2e8f2] pt-3 dark:border-[#1e3a6a]">
+        <div className="flex items-center justify-between border-t border-stone-100 pt-3 dark:border-stone-800">
           <Link
             href={`/author/${post.author.id}`}
             className="flex items-center gap-2 group/author"
@@ -222,18 +222,18 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
             <Image
               src={post.author.avatar}
               alt={post.author.name}
-              width={26}
-              height={26}
-              className="rounded-full object-cover ring-1 ring-slate-200"
+              width={24}
+              height={24}
+              className="rounded-full object-cover ring-1 ring-stone-300"
             />
-            <span className="text-xs font-semibold text-[#08214e] dark:text-slate-200 group-hover/author:text-[#20509b]">
+            <span className="text-xs font-semibold text-stone-800 dark:text-stone-200 group-hover/author:text-amber-600">
               {post.author.name}
             </span>
           </Link>
 
-          <div className="flex items-center gap-2.5 text-xs text-[#93a0b4] font-mono">
+          <div className="flex items-center gap-2.5 text-xs text-stone-500 font-mono">
             <span className="flex items-center gap-1">
-              <Eye className="h-3.5 w-3.5 text-[#20509b]" />
+              <Eye className="h-3.5 w-3.5" />
               {formatCompactNumber(post.views)}
             </span>
             <span className="flex items-center gap-1">

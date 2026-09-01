@@ -28,7 +28,7 @@ export default async function DashboardPage() {
   const recentPublished = allPosts.filter((p) => p.status === "published").slice(0, 4);
 
   return (
-    <div className="p-6 sm:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="space-y-8">
       <DashboardHeader
         title="Creator Studio & Analytics"
         description="Monitor real reader engagement, publish drafts, and maintain your technical catalog."
