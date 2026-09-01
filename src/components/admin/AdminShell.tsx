@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   Sparkles,
+  User,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/public/ThemeToggle";
 import { getAdminKPIs } from "@/lib/api/admin";
@@ -83,6 +84,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       label: "Taxonomy & Tracks",
       href: "/admin/categories",
       icon: Layers,
+    },
+    {
+      label: "Profile & Author Bio",
+      href: "/admin/profile",
+      icon: User,
     },
   ];
 

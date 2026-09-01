@@ -426,3 +426,22 @@ export async function getAdminKPIs(): Promise<AdminKPISummary> {
     openTickets,
   };
 }
+
+/* =========================================================
+   Admin Profile Management API
+========================================================= */
+
+const PROFILE_STORAGE_KEY = "devlog_admin_profile";
+
+export async function getAdminProfile() {
+  const profile = getStorage(PROFILE_STORAGE_KEY, MOCK_AUTHORS[0]);
+  return profile;
+}
+
+export async function updateAdminProfile(data: Partial<typeof MOCK_AUTHORS[0]>) {
+  const current = await getAdminProfile();
+  const updated = { ...current, ...data };
+  setStorage(PROFILE_STORAGE_KEY, updated);
+  return updated;
+}
+

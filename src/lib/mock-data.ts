@@ -44,7 +44,7 @@ export const MOCK_AUTHORS: Author[] = [
     id: 'auth-khophi',
     name: 'Khophi',
     handle: 'khophi_the_blogger',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=250&auto=format&fit=crop&q=80',
+    avatar: '/khophi_profile.jpg',
     bio: 'Hey! I’m Khophi. I write essays on building software, mobile money infrastructure, Afrobeats culture, and daily life in Accra, Ghana.',
     role: 'Engineer, Writer & Creator',
     location: 'Accra, Ghana 🇬🇭',

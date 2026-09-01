@@ -21,12 +21,12 @@ export default function AboutPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-5">
           <Image
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80"
+            src="/khophi_profile.jpg"
             alt="Khophi"
             width={88}
             height={88}
             priority
-            className="rounded-3xl object-cover ring-2 ring-amber-500 shadow-md"
+            className="rounded-3xl object-cover ring-2 ring-amber-500 shadow-md h-[88px] w-[88px]"
           />
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-4xl font-black text-stone-900 dark:text-stone-100 font-heading">

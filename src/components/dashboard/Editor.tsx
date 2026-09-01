@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Heading2,
   Heading3,
@@ -21,13 +22,15 @@ import {
   CheckCircle,
   Save,
   ArrowLeft,
+  Clock,
+  Sparkles,
+  Layers,
 } from "lucide-react";
 import { Post, Category, Tag, PostStatus } from "@/lib/types";
 import { createPost, updatePost } from "@/lib/api/posts";
 import { getCategories, getTags } from "@/lib/api/categories";
 import { calculateReadingTime, slugify } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { ArticleContent } from "@/components/public/ArticleContent";
 import { PostSettingsModal } from "./PostSettingsModal";
 import { useToast } from "@/components/ui/Toast";
@@ -41,28 +44,25 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
   const router = useRouter();
   const { toast } = useToast();
 
-  // Core Form State
+  // Core Form State (EMPTY BY DEFAULT FOR NEW ARTICLES)
   const [title, setTitle] = React.useState(initialPost?.title || "");
-  const [content, setContent] = React.useState(
-    initialPost?.content ||
-      `### Architecture Overview\n\nExplain the system design, latency trade-offs, and data pipelines here.\n\n\`\`\`typescript\n// Example implementation\nexport async function executeDistributedTask(payload: TaskPayload) {\n  const startTime = performance.now();\n  const result = await workerPool.dispatch(payload);\n  return { result, durationMs: performance.now() - startTime };\n}\n\`\`\`\n\n### Key Takeaways\n\n* **Low-Latency Edge Execution**: Keep computation close to the reader.\n* **Optimistic Updates**: Provide instantaneous user feedback before roundtrips resolve.\n\n> "Good software architecture simplifies change and decouples blast radius."\n`
-  );
+  const [content, setContent] = React.useState(initialPost?.content || "");
   const [slug, setSlug] = React.useState(
     initialPost?.slug || (initialPost?.title ? slugify(initialPost.title) : "")
   );
   const [excerpt, setExcerpt] = React.useState(initialPost?.excerpt || "");
   const [coverImage, setCoverImage] = React.useState(
     initialPost?.coverImage ||
-      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&auto=format&fit=crop&q=80"
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80"
   );
   const [status, setStatus] = React.useState<PostStatus>(
     initialPost?.status || "published"
   );
-  const [categoryId, setCategoryId] = React.useState<string>(
-    initialPost?.category?.id || "cat-1"
+  const [categoryId, setCategoryId] = React.useState(
+    initialPost?.category?.id || "cat-tech"
   );
   const [selectedTagIds, setSelectedTagIds] = React.useState<string[]>(
-    initialPost?.tags?.map((t) => t.id) || ["tag-1", "tag-2"]
+    initialPost?.tags?.map((t) => t.id) || ["tag-1"]
   );
   const [metaTitle, setMetaTitle] = React.useState(
     initialPost?.seo?.metaTitle || ""
@@ -71,36 +71,46 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
     initialPost?.seo?.metaDescription || ""
   );
 
-  // UI State
-  const [viewMode, setViewMode] = React.useState<"write" | "split" | "preview">(
-    "split"
-  );
-  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
-  const [isSaving, setIsSaving] = React.useState(false);
+  // View & UI State (Default to single Write view on mobile)
+  const [viewMode, setViewMode] = React.useState<"write" | "split" | "preview">("write");
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [allTags, setAllTags] = React.useState<Tag[]>([]);
+  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [isPublishing, setIsPublishing] = React.useState(false);
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   React.useEffect(() => {
-    getCategories().then(setCategories);
-    getTags().then(setAllTags);
-  }, []);
+    Promise.all([getCategories(), getTags()]).then(([cats, tags]) => {
+      setCategories(cats);
+      setAllTags(tags);
+      if (!initialPost && cats.length > 0) {
+        setCategoryId(cats[0].id);
+      }
+    });
+  }, [initialPost]);
 
-  // Word count & reading time
-  const readingTime = calculateReadingTime(content);
-  const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+  // Sync title to slug automatically on create mode if slug wasn't manually customized
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setTitle(val);
+    if (mode === "create") {
+      setSlug(slugify(val));
+    }
+  };
 
-  const insertSnippet = (before: string, after: string = "") => {
+  // Helper to insert Markdown text at current cursor position
+  const insertMarkdown = (before: string, after: string = "", placeholder: string = "") => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const previousText = textarea.value;
-    const selectedText = previousText.substring(start, end);
+    const selectedText = previousText.substring(start, end) || placeholder;
 
-    const replacement = before + selectedText + after;
+    const replacement = `${before}${selectedText}${after}`;
     const newContent =
       previousText.substring(0, start) +
       replacement +
@@ -114,333 +124,349 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
         start + before.length,
         start + before.length + selectedText.length
       );
-    }, 10);
+    }, 50);
   };
 
-  const handleSave = async (targetStatus: PostStatus = status) => {
+  const handleSave = async (targetStatus: PostStatus) => {
     if (!title.trim()) {
       toast({
-        title: "Title required",
+        title: "Title Required",
         description: "Please provide an article title before saving.",
         type: "error",
       });
       return;
     }
 
-    setIsSaving(true);
+    if (targetStatus === "published") {
+      setIsPublishing(true);
+    } else {
+      setIsSaving(true);
+    }
+
     try {
-      if (mode === "create") {
-        const created = await createPost({
-          title,
-          slug: slug || slugify(title),
-          excerpt: excerpt || content.slice(0, 140) + "...",
-          content,
-          coverImage,
-          categoryId,
-          tagIds: selectedTagIds,
-          status: targetStatus,
-          authorId: "auth-1",
-          seo: {
-            metaTitle: metaTitle || title,
-            metaDescription: metaDescription || excerpt,
-          },
-        });
+      const payload = {
+        title: title.trim(),
+        slug: slug.trim() || slugify(title),
+        content,
+        excerpt: excerpt.trim() || content.slice(0, 140) + "...",
+        coverImage,
+        categoryId,
+        tagIds: selectedTagIds,
+        authorId: initialPost?.author?.id || "auth-khophi",
+        status: targetStatus,
+        language: "en" as const,
+        seo: {
+          metaTitle: metaTitle.trim() || title.trim(),
+          metaDescription: metaDescription.trim() || excerpt.trim(),
+        },
+      };
 
-        toast({
-          title: targetStatus === "published" ? "Article Published!" : "Draft Saved!",
-          description: `"${title}" has been saved to your catalog.`,
-          type: "success",
-        });
-
-        router.push(targetStatus === "published" ? `/blog/${created.slug}` : `/dashboard/posts`);
-      } else if (initialPost) {
-        const updated = await updatePost(initialPost.id, {
-          title,
-          slug: slug || slugify(title),
-          excerpt,
-          content,
-          coverImage,
-          status: targetStatus,
-          seo: {
-            metaTitle,
-            metaDescription,
-          },
-        });
-
+      if (mode === "edit" && initialPost) {
+        await updatePost(initialPost.id, payload);
         toast({
           title: "Article Updated!",
-          description: "All changes have been successfully saved.",
+          description: `"${title}" has been saved as ${targetStatus}.`,
           type: "success",
         });
-
-        router.push(`/dashboard/posts`);
+      } else {
+        await createPost(payload);
+        toast({
+          title: targetStatus === "published" ? "Article Published!" : "Draft Saved!",
+          description: `"${title}" is now ${targetStatus}.`,
+          type: "success",
+        });
       }
-    } catch (err) {
+
+      router.push("/dashboard/posts");
+      router.refresh();
+    } catch {
       toast({
-        title: "Failed to save article",
-        description: "An unexpected error occurred.",
+        title: "Save Failed",
+        description: "An error occurred while saving the article.",
         type: "error",
       });
     } finally {
       setIsSaving(false);
+      setIsPublishing(false);
     }
   };
 
+  const currentCategory = categories.find((c) => c.id === categoryId);
+  const readingTime = calculateReadingTime(content);
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
-      {/* Top Action Bar */}
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.push("/dashboard/posts")}
-            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <div className="hidden sm:block">
-            <p className="text-xs text-slate-400">
-              {mode === "create" ? "Creating Draft" : "Editing Article"}
-            </p>
-            <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">
-              {title || "Untitled Article"}
-            </p>
+    <div className="space-y-4">
+      {/* 1. Header Toolbar (Responsive Mobile & Desktop) */}
+      <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 shadow-sm space-y-3">
+        {/* Top Row: Back link, status, and save/publish buttons */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <Link
+              href="/dashboard/posts"
+              className="p-1.5 rounded-lg text-stone-500 hover:text-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              title="Back to articles"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+                {mode === "create" ? "New Article" : "Editing Article"}
+              </p>
+              <p className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100 truncate max-w-[180px] sm:max-w-xs">
+                {title || "Untitled Post"}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSettingsOpen(true)}
+              className="h-8 sm:h-9 text-xs gap-1.5 rounded-xl border-stone-300 dark:border-stone-700"
+              title="Post Settings"
+            >
+              <Settings className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Settings</span>
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="sm"
+              isLoading={isSaving}
+              onClick={() => handleSave("draft")}
+              className="h-8 sm:h-9 text-xs gap-1.5 rounded-xl bg-stone-100 text-stone-800 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-200"
+            >
+              <Save className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Save Draft</span>
+            </Button>
+
+            <Button
+              size="sm"
+              isLoading={isPublishing}
+              onClick={() => handleSave("published")}
+              className="h-8 sm:h-9 text-xs gap-1.5 rounded-xl bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold hover:opacity-90 shadow-sm"
+            >
+              <CheckCircle className="h-3.5 w-3.5" />
+              <span>Publish</span>
+            </Button>
           </div>
         </div>
 
-        {/* View mode toggle */}
-        <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-          <button
-            onClick={() => setViewMode("write")}
-            className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors ${
-              viewMode === "write"
-                ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
-            }`}
-          >
-            <Edit3 className="h-3.5 w-3.5" /> Write
-          </button>
-          <button
-            onClick={() => setViewMode("split")}
-            className={`hidden md:flex px-2.5 py-1 rounded text-xs font-medium items-center gap-1 transition-colors ${
-              viewMode === "split"
-                ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
-            }`}
-          >
-            <Columns2 className="h-3.5 w-3.5" /> Split
-          </button>
-          <button
-            onClick={() => setViewMode("preview")}
-            className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors ${
-              viewMode === "preview"
-                ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
-            }`}
-          >
-            <Eye className="h-3.5 w-3.5" /> Preview
-          </button>
-        </div>
+        {/* Second Row: View Tabs & Markdown Toolbar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-stone-100 dark:border-stone-800">
+          {/* View Modes */}
+          <div className="flex items-center gap-1 p-1 bg-stone-100 dark:bg-stone-800/80 rounded-xl w-fit">
+            <button
+              onClick={() => setViewMode("write")}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                viewMode === "write"
+                  ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-white shadow-sm"
+                  : "text-stone-500 hover:text-stone-900 dark:text-stone-400"
+              }`}
+            >
+              <Edit3 className="h-3.5 w-3.5" />
+              <span>Write</span>
+            </button>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsSettingsOpen(true)}
-            className="gap-1.5 border-slate-300 dark:border-slate-700"
-          >
-            <Settings className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Settings</span>
-          </Button>
+            <button
+              onClick={() => setViewMode("split")}
+              className={`hidden md:flex px-3 py-1 rounded-lg text-xs font-semibold items-center gap-1.5 transition-colors ${
+                viewMode === "split"
+                  ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-white shadow-sm"
+                  : "text-stone-500 hover:text-stone-900 dark:text-stone-400"
+              }`}
+            >
+              <Columns2 className="h-3.5 w-3.5" />
+              <span>Split</span>
+            </button>
 
-          <Button
-            variant="secondary"
-            size="sm"
-            isLoading={isSaving}
-            onClick={() => handleSave("draft")}
-            className="gap-1.5"
-          >
-            <Save className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Save Draft</span>
-          </Button>
+            <button
+              onClick={() => setViewMode("preview")}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                viewMode === "preview"
+                  ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-white shadow-sm"
+                  : "text-stone-500 hover:text-stone-900 dark:text-stone-400"
+              }`}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              <span>Preview</span>
+            </button>
+          </div>
 
-          <Button
-            size="sm"
-            isLoading={isSaving}
-            onClick={() => handleSave("published")}
-            className="shadow-sm"
-          >
-            Publish Article
-          </Button>
-        </div>
-      </header>
+          {/* Markdown Quick Formatting Toolbar (Touch Scrollable on Mobile) */}
+          <div className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-none">
+            <button
+              onClick={() => insertMarkdown("## ", "\n", "Heading 2")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 text-xs font-bold shrink-0"
+              title="Heading 2"
+            >
+              <Heading2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => insertMarkdown("### ", "\n", "Heading 3")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 text-xs font-bold shrink-0"
+              title="Heading 3"
+            >
+              <Heading3 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => insertMarkdown("**", "**", "bold text")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              title="Bold"
+            >
+              <Bold className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => insertMarkdown("*", "*", "italic text")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              title="Italic"
+            >
+              <Italic className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => insertMarkdown("\n```typescript\n", "\n```\n", "// code here")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              title="Code block"
+            >
+              <Code className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => insertMarkdown("\n> ", "\n", "quote text")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              title="Blockquote"
+            >
+              <Quote className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => insertMarkdown("\n* ", "\n", "List item")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              title="Bulleted list"
+            >
+              <List className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => insertMarkdown("\n1. ", "\n", "List item")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              title="Numbered list"
+            >
+              <ListOrdered className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => insertMarkdown("[", "](https://example.com)", "link text")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              title="Link"
+            >
+              <LinkIcon className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => insertMarkdown("![alt text](", ")", "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80")}
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              title="Image markdown"
+            >
+              <ImageIcon className="h-4 w-4" />
+            </button>
 
-      {/* Editor Markdown Toolbar */}
-      {viewMode !== "preview" && (
-        <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2 flex items-center gap-1 overflow-x-auto">
-          <button
-            type="button"
-            onClick={() => insertSnippet("## ", "")}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-            title="Heading 2"
-          >
-            <Heading2 className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSnippet("### ", "")}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-            title="Heading 3"
-          >
-            <Heading3 className="h-4 w-4" />
-          </button>
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
-          <button
-            type="button"
-            onClick={() => insertSnippet("**", "**")}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold"
-            title="Bold"
-          >
-            <Bold className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSnippet("*", "*")}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 italic"
-            title="Italic"
-          >
-            <Italic className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSnippet("```typescript\n", "\n```")}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-            title="Code Block"
-          >
-            <Code className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSnippet("> ", "")}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-            title="Blockquote"
-          >
-            <Quote className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSnippet("- ", "")}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-            title="Bullet list"
-          >
-            <List className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSnippet("1. ", "")}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-            title="Numbered list"
-          >
-            <ListOrdered className="h-4 w-4" />
-          </button>
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
-          <button
-            type="button"
-            onClick={() => insertSnippet("[Link Text](", ")")}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-            title="Insert Link"
-          >
-            <LinkIcon className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              insertSnippet(
-                "![Architecture Diagram](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200)",
-                ""
-              )
-            }
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-            title="Insert Image"
-          >
-            <ImageIcon className="h-4 w-4" />
-          </button>
-
-          <div className="ml-auto flex items-center gap-3 text-[11px] text-slate-500 font-medium">
-            <span>{wordCount} words</span>
-            <span>•</span>
-            <span>{readingTime} min read</span>
+            <span className="text-[11px] text-stone-400 font-mono ml-2 whitespace-nowrap">
+              {readingTime} min read
+            </span>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Main Writing Area */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* 2. Main Editing Surface */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
         {/* Write Pane */}
         {(viewMode === "write" || viewMode === "split") && (
           <div
-            className={`flex-1 flex flex-col p-6 sm:p-10 overflow-y-auto bg-white dark:bg-slate-900 ${
-              viewMode === "split" ? "border-r border-slate-200 dark:border-slate-800" : ""
+            className={`space-y-4 ${
+              viewMode === "split" ? "md:col-span-6" : "md:col-span-12"
             }`}
           >
-            <input
-              type="text"
-              placeholder="Article Title..."
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                if (!slug || slug === slugify(title)) {
-                  setSlug(slugify(e.target.value));
-                }
-              }}
-              className="w-full text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 placeholder:text-slate-300 focus:outline-none dark:text-white dark:placeholder:text-slate-600 bg-transparent mb-6"
-            />
+            <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 shadow-sm space-y-4">
+              {/* Title Input */}
+              <input
+                type="text"
+                value={title}
+                onChange={handleTitleChange}
+                placeholder="Article Title..."
+                className="w-full bg-transparent text-xl sm:text-2xl lg:text-3xl font-black text-stone-900 dark:text-stone-100 placeholder:text-stone-300 dark:placeholder:text-stone-600 font-heading focus:outline-none border-b border-stone-100 dark:border-stone-800 pb-3"
+              />
 
-            <textarea
-              ref={textareaRef}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your article in Markdown..."
-              className="flex-1 w-full bg-transparent font-mono text-sm leading-relaxed text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none resize-none min-h-[500px]"
-            />
+              {/* Markdown Body Textarea */}
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write your story in markdown... (supports headings ##, code blocks, lists, quotes, and images)"
+                rows={18}
+                className="w-full bg-transparent text-sm sm:text-base text-stone-800 dark:text-stone-200 placeholder:text-stone-400 font-mono leading-relaxed focus:outline-none resize-y min-h-[360px]"
+              />
+            </div>
           </div>
         )}
 
         {/* Live Preview Pane */}
-        {(viewMode === "split" || viewMode === "preview") && (
+        {(viewMode === "preview" || viewMode === "split") && (
           <div
-            className={`flex-1 p-6 sm:p-10 overflow-y-auto ${
-              viewMode === "preview" ? "max-w-4xl mx-auto w-full" : ""
+            className={`space-y-4 ${
+              viewMode === "split" ? "md:col-span-6" : "md:col-span-12"
             }`}
           >
-            {coverImage && (
-              <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden mb-8 shadow-md">
-                <Image
-                  src={coverImage}
-                  alt={title || "Cover Image"}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
-
-            <div className="space-y-4 mb-8">
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-                {title || "Untitled Article"}
-              </h1>
-              {excerpt && (
-                <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed italic">
-                  {excerpt}
-                </p>
+            <div className="p-4 sm:p-8 rounded-3xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 shadow-sm space-y-6">
+              {/* Cover Photo */}
+              {coverImage && (
+                <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden shadow-sm bg-stone-100 dark:bg-stone-800">
+                  <Image
+                    src={coverImage}
+                    alt={title || "Cover photo"}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               )}
-            </div>
 
-            <ArticleContent content={content} />
+              {/* Title & Metadata Header */}
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  {currentCategory && (
+                    <span className="editorial-tag font-bold px-2.5 py-0.5 rounded-full">
+                      {currentCategory.name}
+                    </span>
+                  )}
+                  <span className="text-stone-500 font-medium">
+                    {readingTime} min read
+                  </span>
+                </div>
+
+                <h1 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-stone-100 font-heading leading-tight">
+                  {title || "Untitled Article"}
+                </h1>
+
+                {excerpt && (
+                  <p className="text-sm text-stone-600 dark:text-stone-300 italic leading-relaxed">
+                    {excerpt}
+                  </p>
+                )}
+              </div>
+
+              {/* Rendered Content */}
+              <div className="border-t border-stone-100 dark:border-stone-800 pt-6">
+                {content ? (
+                  <ArticleContent content={content} />
+                ) : (
+                  <p className="text-xs text-stone-400 italic">
+                    Start typing on the Write tab to see the live formatted preview here.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Settings Modal */}
+      {/* Post Settings Modal */}
       <PostSettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
