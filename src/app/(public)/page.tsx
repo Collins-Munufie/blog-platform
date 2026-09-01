@@ -119,7 +119,7 @@ export default async function HomePage() {
               <Layers className="h-3.5 w-3.5" />
               <span>Multi-Part Series</span>
             </div>
-            <h3 className="text-2xl sm:text-3xl font-black font-heading text-white">
+            <h3 className="text-2xl sm:text-3xl font-black font-heading !text-white">
               Silicon Accra: The 2026 Tech Frontier
             </h3>
             <p className="text-xs sm:text-sm text-blue-100/90 max-w-xl">

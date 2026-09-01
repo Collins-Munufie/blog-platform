@@ -108,8 +108,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/admin" className="hover:text-[#20509b] dark:hover:text-[#8ab1e3] transition-colors">
-                  Administrative Suite
+                <Link href="/about" className="hover:text-[#20509b] dark:hover:text-[#8ab1e3] transition-colors">
+                  About &amp; Standards
                 </Link>
               </li>
             </ul>

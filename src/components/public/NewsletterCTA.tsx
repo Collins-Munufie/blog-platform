@@ -32,7 +32,7 @@ export function NewsletterCTA() {
           Accra Tech &amp; Culture Dispatch
         </div>
 
-        <h3 className="text-2xl sm:text-4xl font-black tracking-tight font-heading leading-tight">
+        <h3 className="text-2xl sm:text-4xl font-black tracking-tight font-heading leading-tight !text-white">
           Get the pulse of Silicon Accra in your inbox &amp; WhatsApp
         </h3>
 

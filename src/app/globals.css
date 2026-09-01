@@ -44,12 +44,22 @@
 /* Inspiration UI from dummyegator: Brand Atmosphere, Featured Panel & Gradients */
 .brand-atmosphere {
   background: linear-gradient(rgba(0, 0, 0, 0) 62%, rgba(4, 21, 54, 0.55) 100%),
-    radial-gradient(50% 45% at 95% 100%, rgba(244, 174, 23, 0.22) 0%, rgba(0, 0, 0, 0) 55%),
-    radial-gradient(70% 55% at 72% 42%, rgba(61, 118, 198, 0.35) 0%, rgba(0, 0, 0, 0) 60%),
-    radial-gradient(90% 70% at 8% -10%, rgba(99, 148, 214, 0.45) 0%, rgba(0, 0, 0, 0) 55%),
+    radial-gradient(50% 45% at 95% 100%, rgba(245, 158, 11, 0.25) 0%, rgba(0, 0, 0, 0) 55%),
+    radial-gradient(70% 55% at 72% 42%, rgba(32, 80, 155, 0.45) 0%, rgba(0, 0, 0, 0) 60%),
+    radial-gradient(90% 70% at 8% -10%, rgba(99, 148, 214, 0.5) 0%, rgba(0, 0, 0, 0) 55%),
     linear-gradient(165deg, #041536 0%, #08214e 28%, #12346e 58%, #1a4a8c 82%, #20509b 100%);
   position: relative;
   overflow: hidden;
+  color: #ffffff;
+}
+
+.brand-atmosphere h1,
+.brand-atmosphere h2,
+.brand-atmosphere h3,
+.brand-atmosphere h4,
+.brand-atmosphere h5,
+.brand-atmosphere h6 {
+  color: #ffffff !important;
 }
 
 .brand-atmosphere::before {
@@ -63,12 +73,22 @@
 
 .featured-panel {
   isolation: isolate;
-  background: radial-gradient(ellipse 90% 80% at 15% 15%, rgba(253, 192, 53, 0.28) 0%, transparent 52%),
+  background: radial-gradient(ellipse 90% 80% at 15% 15%, rgba(245, 158, 11, 0.3) 0%, transparent 52%),
     radial-gradient(ellipse 70% 90% at 85% 85%, rgba(99, 148, 214, 0.55) 0%, transparent 55%),
     radial-gradient(ellipse 55% 60% at 40% 70%, rgba(32, 80, 155, 0.9) 0%, transparent 60%),
     linear-gradient(125deg, #041536 0%, #08214e 32%, #12346e 58%, #20509b 82%, #3d76c6 100%);
   position: relative;
   overflow: hidden;
+  color: #ffffff;
+}
+
+.featured-panel h1,
+.featured-panel h2,
+.featured-panel h3,
+.featured-panel h4,
+.featured-panel h5,
+.featured-panel h6 {
+  color: #ffffff !important;
 }
 
 .glass-pill {
