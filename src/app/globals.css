@@ -4,8 +4,10 @@
 
 @layer base {
   :root {
-    --background: #fcfcfd;
-    --foreground: #090d16;
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --font-heading: "Plus Jakarta Sans", -apple-system, sans-serif;
+    --font-sans: "Inter", -apple-system, sans-serif;
   }
 
   .dark {
@@ -14,19 +16,41 @@
   }
 
   * {
-    @apply border-slate-200 dark:border-slate-800;
+    @apply border-slate-200/80 dark:border-slate-800/80;
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary-500/20 selection:text-primary-700 dark:selection:text-primary-300 min-h-screen;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    @apply bg-background text-foreground antialiased selection:bg-blue-500/20 selection:text-blue-700 min-h-screen font-sans;
+    letter-spacing: -0.011em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight text-slate-900 dark:text-white font-bold;
   }
 }
 
-/* Custom scrollbars */
+/* Glassmorphism & atmosphere utility classes */
+.glass-header {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+}
+
+.dark .glass-header {
+  background-color: rgba(9, 13, 22, 0.85);
+}
+
+.card-simple {
+  @apply bg-white dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-800/80 rounded-2xl transition-all duration-200;
+}
+
+.card-hover {
+  @apply hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-card hover:-translate-y-[1px];
+}
+
+/* Clean Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -34,7 +58,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+  @apply bg-slate-300/80 dark:bg-slate-700/80 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {

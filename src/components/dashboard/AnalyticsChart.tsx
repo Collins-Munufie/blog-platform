@@ -1,115 +1,136 @@
 "use client";
 
 import * as React from "react";
-import { Eye, Heart, MessageSquare, Clock, TrendingUp } from "lucide-react";
-import { AnalyticsSummary } from "@/lib/types";
+import {
+  Eye,
+  Heart,
+  FileText,
+  Clock,
+  CheckCircle2,
+  FileEdit,
+  TrendingUp,
+  Layers,
+} from "lucide-react";
+import { ExtendedAnalyticsSummary } from "@/lib/api/analytics";
 import { formatCompactNumber } from "@/lib/utils";
 
-export function AnalyticsChart({ data }: { data: AnalyticsSummary }) {
-  const maxViews = Math.max(...data.viewsTrend.map((d) => d.views));
+export function AnalyticsChart({ data }: { data: ExtendedAnalyticsSummary }) {
+  const maxViews = Math.max(...data.viewsTrend.map((d) => d.views), 1);
 
   return (
-    <div className="space-y-8">
-      {/* 4 Stat Cards */}
+    <div className="space-y-6">
+      {/* 4 Core Dynamic Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 shadow-sm space-y-3">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Total Reads</span>
-            <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
+        {/* Total Catalog */}
+        <div className="card-simple p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              Total Articles
+            </span>
+            <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
+              <FileText className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <p className="text-3xl font-extrabold font-heading text-slate-900 dark:text-white">
+              {data.totalPosts}
+            </p>
+            <span className="text-xs font-medium text-slate-500">
+              {data.publishedCount} published • {data.draftCount} drafts
+            </span>
+          </div>
+        </div>
+
+        {/* Real Dynamic Reads */}
+        <div className="card-simple p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              Cumulative Reads
+            </span>
+            <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
               <Eye className="h-4 w-4" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
+            <p className="text-3xl font-extrabold font-heading text-slate-900 dark:text-white">
               {formatCompactNumber(data.totalViews)}
             </p>
-            <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-              <TrendingUp className="h-3 w-3" /> +18.4%
+            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+              <TrendingUp className="h-3 w-3" /> Live metric
             </span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 shadow-sm space-y-3">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Reactions & Claps</span>
-            <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400">
+        {/* Real Dynamic Reactions */}
+        <div className="card-simple p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              Reader Reactions
+            </span>
+            <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400">
               <Heart className="h-4 w-4" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
+            <p className="text-3xl font-extrabold font-heading text-slate-900 dark:text-white">
               {formatCompactNumber(data.totalLikes)}
             </p>
-            <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-              <TrendingUp className="h-3 w-3" /> +12.1%
+            <span className="text-xs font-medium text-slate-500">
+              {data.totalLikes > 0 ? "Active engagement" : "No reactions yet"}
             </span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 shadow-sm space-y-3">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Discussions</span>
-            <div className="p-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400">
-              <MessageSquare className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              {data.totalComments}
-            </p>
-            <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-              <TrendingUp className="h-3 w-3" /> +5.7%
+        {/* Average Read Time */}
+        <div className="card-simple p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              Avg. Reading Depth
             </span>
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 shadow-sm space-y-3">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Avg Read Time</span>
-            <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
+            <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
               <Clock className="h-4 w-4" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              {data.avgReadTimeMinutes} min
+            <p className="text-3xl font-extrabold font-heading text-slate-900 dark:text-white">
+              {data.avgReadTimeMinutes} <span className="text-base font-normal text-slate-400">min</span>
             </p>
-            <span className="text-xs font-medium text-slate-400">Top 5% sector</span>
+            <span className="text-xs font-medium text-slate-500">Calculated word count</span>
           </div>
         </div>
       </div>
 
-      {/* Main Chart + Traffic Sources Grid */}
+      {/* Readership Distribution & Category Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Trend Visualization (SVG Bar Chart) */}
-        <div className="lg:col-span-2 p-6 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 shadow-sm space-y-6">
+        {/* Trend Bar Chart */}
+        <div className="lg:col-span-2 card-simple p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Readership & Engagement Growth
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                Readership Trajectory
               </h3>
-              <p className="text-xs text-slate-400">30-day traffic velocity</p>
+              <p className="text-xs text-slate-500">Weekly traffic distribution across all active stories</p>
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-              Last 30 Days
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+              Real-time
             </span>
           </div>
 
-          <div className="h-56 flex items-end justify-between gap-3 pt-6">
+          <div className="h-48 flex items-end justify-between gap-4 pt-4">
             {data.viewsTrend.map((item, idx) => {
-              const heightPercent = Math.round((item.views / maxViews) * 100);
+              const heightPercent = Math.max(15, Math.round((item.views / maxViews) * 100));
               return (
                 <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                  <div className="text-[10px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
+                  <div className="text-[11px] text-slate-500 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
                     {formatCompactNumber(item.views)}
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg h-44 flex items-end overflow-hidden">
+                  <div className="w-full bg-slate-100 dark:bg-slate-800/80 rounded-xl h-36 flex items-end overflow-hidden p-1">
                     <div
                       style={{ height: `${heightPercent}%` }}
-                      className="w-full bg-gradient-to-t from-primary-600 to-indigo-400 dark:from-primary-500 dark:to-indigo-400 rounded-t transition-all duration-500 group-hover:brightness-110"
+                      className="w-full bg-gradient-to-t from-blue-600 to-indigo-500 dark:from-blue-500 dark:to-indigo-400 rounded-lg transition-all duration-500 group-hover:brightness-110"
                     />
                   </div>
-                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                  <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
                     {item.date}
                   </span>
                 </div>
@@ -118,31 +139,28 @@ export function AnalyticsChart({ data }: { data: AnalyticsSummary }) {
           </div>
         </div>
 
-        {/* Traffic Sources */}
-        <div className="p-6 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 shadow-sm space-y-6">
+        {/* Category Topic Breakdown */}
+        <div className="card-simple p-6 space-y-4">
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              Traffic Sources
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              Publication Balance
             </h3>
-            <p className="text-xs text-slate-400">Where readers discover articles</p>
+            <p className="text-xs text-slate-500">Distribution by topic taxonomy</p>
           </div>
 
-          <div className="space-y-4">
-            {data.trafficSources.map((source) => (
-              <div key={source.name} className="space-y-1.5">
+          <div className="space-y-3.5 pt-1">
+            {data.categoryBreakdown.map((cat) => (
+              <div key={cat.name} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
-                    {source.name}
+                  <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[180px]">
+                    {cat.name}
                   </span>
-                  <span className="font-mono text-slate-400">{source.percentage}%</span>
+                  <span className="font-mono text-slate-500">{cat.count} ({cat.percentage}%)</span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <div
-                    style={{
-                      width: `${source.percentage}%`,
-                      backgroundColor: source.color,
-                    }}
-                    className="h-full rounded-full"
+                    style={{ width: `${cat.percentage}%` }}
+                    className="h-full rounded-full bg-blue-600 dark:bg-blue-500"
                   />
                 </div>
               </div>
