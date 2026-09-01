@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
+import { DeleteConfirmModal } from "@/components/ui/DeleteConfirmModal";
 
 export function PostDataTable({ initialPosts }: { initialPosts: Post[] }) {
   const [posts, setPosts] = React.useState<Post[]>(initialPosts);
@@ -73,19 +74,20 @@ export function PostDataTable({ initialPosts }: { initialPosts: Post[] }) {
     }
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Are you sure you want to permanently delete "${title}"?`)) {
-      return;
-    }
-    setDeletingId(id);
+  const [postToDelete, setPostToDelete] = React.useState<Post | null>(null);
+
+  const handleDeleteConfirm = async () => {
+    if (!postToDelete) return;
+    setDeletingId(postToDelete.id);
     try {
-      await deletePost(id);
-      setPosts((prev) => prev.filter((p) => p.id !== id));
+      await deletePost(postToDelete.id);
+      setPosts((prev) => prev.filter((p) => p.id !== postToDelete.id));
       toast({
         title: "Article Deleted",
-        description: `"${title}" was removed from your publication.`,
+        description: `"${postToDelete.title}" was removed from your publication.`,
         type: "info",
       });
+      setPostToDelete(null);
     } catch {
       toast({
         title: "Failed to delete article",
@@ -314,7 +316,7 @@ export function PostDataTable({ initialPosts }: { initialPosts: Post[] }) {
                           <Edit className="h-4 w-4" />
                         </Link>
                         <button
-                          onClick={() => handleDelete(post.id, post.title)}
+                          onClick={() => setPostToDelete(post)}
                           disabled={deletingId === post.id}
                           title="Delete article"
                           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
@@ -330,6 +332,15 @@ export function PostDataTable({ initialPosts }: { initialPosts: Post[] }) {
           </table>
         </div>
       </div>
+
+      <DeleteConfirmModal
+        isOpen={!!postToDelete}
+        onClose={() => setPostToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Article"
+        itemTitle={postToDelete?.title}
+        isDeleting={!!deletingId}
+      />
     </div>
   );
 }
