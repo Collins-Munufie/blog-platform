@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ArticleContent } from "@/components/public/ArticleContent";
 import { PostSettingsModal } from "./PostSettingsModal";
+import { useToast } from "@/components/ui/Toast";
 
 interface EditorProps {
   initialPost?: Post;
@@ -38,12 +39,13 @@ interface EditorProps {
 
 export function Editor({ initialPost, mode = "create" }: EditorProps) {
   const router = useRouter();
+  const { toast } = useToast();
 
   // Core Form State
   const [title, setTitle] = React.useState(initialPost?.title || "");
   const [content, setContent] = React.useState(
     initialPost?.content ||
-      `### Introduction\n\nStart writing your technical article here with code snippets, architecture diagrams, and detailed breakdowns.\n\n\`\`\`typescript\n// Write your TypeScript / Go / Rust / Python snippets\nfunction calculateMetrics(throughput: number): number {\n  return throughput * 1.5;\n}\n\`\`\`\n\n### Core Engineering Insights\n\n* **Point 1**: Detail key system constraints\n* **Point 2**: Edge delivery patterns\n\n> Important quote or architecture architectural note.\n`
+      `### Architecture Overview\n\nExplain the system design, latency trade-offs, and data pipelines here.\n\n\`\`\`typescript\n// Example implementation\nexport async function executeDistributedTask(payload: TaskPayload) {\n  const startTime = performance.now();\n  const result = await workerPool.dispatch(payload);\n  return { result, durationMs: performance.now() - startTime };\n}\n\`\`\`\n\n### Key Takeaways\n\n* **Low-Latency Edge Execution**: Keep computation close to the reader.\n* **Optimistic Updates**: Provide instantaneous user feedback before roundtrips resolve.\n\n> "Good software architecture simplifies change and decouples blast radius."\n`
   );
   const [slug, setSlug] = React.useState(
     initialPost?.slug || (initialPost?.title ? slugify(initialPost.title) : "")
@@ -75,7 +77,6 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
   );
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
-  const [lastSaved, setLastSaved] = React.useState<string>("Just now");
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [allTags, setAllTags] = React.useState<Tag[]>([]);
 
@@ -118,7 +119,11 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
 
   const handleSave = async (targetStatus: PostStatus = status) => {
     if (!title.trim()) {
-      alert("Please provide an article title.");
+      toast({
+        title: "Title required",
+        description: "Please provide an article title before saving.",
+        type: "error",
+      });
       return;
     }
 
@@ -140,9 +145,16 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
             metaDescription: metaDescription || excerpt,
           },
         });
-        router.push(`/dashboard/posts`);
+
+        toast({
+          title: targetStatus === "published" ? "Article Published!" : "Draft Saved!",
+          description: `"${title}" has been saved to your catalog.`,
+          type: "success",
+        });
+
+        router.push(targetStatus === "published" ? `/blog/${created.slug}` : `/dashboard/posts`);
       } else if (initialPost) {
-        await updatePost(initialPost.id, {
+        const updated = await updatePost(initialPost.id, {
           title,
           slug: slug || slugify(title),
           excerpt,
@@ -154,9 +166,21 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
             metaDescription,
           },
         });
+
+        toast({
+          title: "Article Updated!",
+          description: "All changes have been successfully saved.",
+          type: "success",
+        });
+
         router.push(`/dashboard/posts`);
       }
-      setLastSaved("Just now");
+    } catch (err) {
+      toast({
+        title: "Failed to save article",
+        description: "An unexpected error occurred.",
+        type: "error",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -165,7 +189,7 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
       {/* Top Action Bar */}
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 px-4 sm:px-6 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/dashboard/posts")}
@@ -177,8 +201,8 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
             <p className="text-xs text-slate-400">
               {mode === "create" ? "Creating Draft" : "Editing Article"}
             </p>
-            <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]">
-              {title || "Untitled"}
+            <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">
+              {title || "Untitled Article"}
             </p>
           </div>
         </div>
@@ -223,7 +247,7 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
             variant="outline"
             size="sm"
             onClick={() => setIsSettingsOpen(true)}
-            className="gap-1.5"
+            className="gap-1.5 border-slate-300 dark:border-slate-700"
           >
             <Settings className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Settings</span>
@@ -332,7 +356,7 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
             type="button"
             onClick={() =>
               insertSnippet(
-                "![Alt Text](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200)",
+                "![Architecture Diagram](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200)",
                 ""
               )
             }
@@ -342,7 +366,7 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
             <ImageIcon className="h-4 w-4" />
           </button>
 
-          <div className="ml-auto flex items-center gap-3 text-[11px] text-slate-400">
+          <div className="ml-auto flex items-center gap-3 text-[11px] text-slate-500 font-medium">
             <span>{wordCount} words</span>
             <span>•</span>
             <span>{readingTime} min read</span>
