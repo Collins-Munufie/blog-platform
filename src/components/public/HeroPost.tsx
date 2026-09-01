@@ -3,9 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Eye, Heart, Bookmark, Sparkles } from "lucide-react";
+import { Clock, Eye, Heart, Bookmark, Sparkles, ArrowRight, BookOpen, ShieldCheck } from "lucide-react";
 import { Post } from "@/lib/types";
-import { Badge } from "@/components/ui/Badge";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 
@@ -45,7 +44,7 @@ export function HeroPost({ post }: { post: Post }) {
         setIsBookmarked(true);
         toast({
           title: "Saved to Reading List",
-          description: "Access this article anytime in your Saved List.",
+          description: "Access this article anytime in your Saved Stories.",
           type: "success",
         });
       }
@@ -55,99 +54,121 @@ export function HeroPost({ post }: { post: Post }) {
   };
 
   return (
-    <article className="group card-simple card-hover overflow-hidden relative shadow-card">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-8 items-center">
-        {/* Cover Image Container */}
-        <Link
-          href={`/blog/${post.slug}`}
-          className="relative aspect-[16/10] lg:aspect-auto lg:h-full lg:min-h-[380px] lg:col-span-7 overflow-hidden block bg-slate-100 dark:bg-slate-800"
-        >
-          <Image
-            src={post.coverImage}
-            alt={post.title}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 60vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-          <div className="absolute top-4 left-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-700/90 text-white backdrop-blur-md shadow-md">
-              <Sparkles className="h-3 w-3" /> Featured Deep-Dive
+    <article className="featured-panel rounded-3xl text-white shadow-2xl p-6 sm:p-8 lg:p-12 relative overflow-hidden border border-blue-400/20">
+      {/* Decorative ambient radial glows */}
+      <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#f4ae17]/20 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#3d76c6]/30 blur-3xl pointer-events-none" />
+
+      <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
+        {/* Left Column: Metadata, Title & Actions */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Category & Badge */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[#f4ae17] text-[#041536] shadow-md shadow-amber-500/20">
+              <Sparkles className="h-3.5 w-3.5 fill-[#041536]" />
+              Deep-Dive of the Week
             </span>
-          </div>
-        </Link>
 
-        {/* Post Metadata & Content */}
-        <div className="p-6 sm:p-8 lg:p-10 lg:col-span-5 flex flex-col justify-between space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Link href={`/categories?slug=${post.category.slug}`}>
-                <Badge variant="indigo" size="md">
-                  {post.category.name}
-                </Badge>
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 text-xs text-slate-400">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span>{post.readingTimeMinutes} min read</span>
-                </div>
-                <button
-                  onClick={handleBookmarkToggle}
-                  className={`p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors ${
-                    isBookmarked ? "text-blue-600 dark:text-blue-400" : ""
-                  }`}
-                  title={isBookmarked ? "Remove bookmark" : "Save for later"}
-                >
-                  <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
-                </button>
-              </div>
+            <span className="glass-pill px-3 py-1 rounded-full text-xs font-semibold text-blue-100">
+              {post.category.name}
+            </span>
+
+            <div className="flex items-center gap-1.5 text-xs text-blue-200">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{post.readingTimeMinutes} min read</span>
             </div>
+          </div>
 
-            <Link href={`/blog/${post.slug}`}>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight font-heading">
-                {post.title}
-              </h2>
+          {/* Heading */}
+          <Link href={`/blog/${post.slug}`}>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white hover:text-[#fdc035] transition-colors leading-[1.15] font-heading">
+              {post.title}
+            </h2>
+          </Link>
+
+          {/* Excerpt */}
+          <p className="text-sm sm:text-base text-blue-100/90 line-clamp-3 leading-relaxed max-w-2xl">
+            {post.excerpt}
+          </p>
+
+          {/* Metrics Chips inspired by dummyegator stats */}
+          <div className="flex flex-wrap items-center gap-4 py-2 text-xs text-blue-200">
+            <div className="flex items-center gap-1.5 font-medium">
+              <Eye className="h-4 w-4 text-[#fdc035]" />
+              <span className="font-bold text-white">{formatCompactNumber(post.views)}</span> Reads
+            </div>
+            <div className="flex items-center gap-1.5 font-medium">
+              <Heart className="h-4 w-4 text-rose-400 fill-rose-400" />
+              <span className="font-bold text-white">{formatCompactNumber(post.likes)}</span> Reactions
+            </div>
+            <div className="flex items-center gap-1.5 font-medium">
+              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+              <span>Peer-Reviewed</span>
+            </div>
+          </div>
+
+          {/* Action Row */}
+          <div className="flex flex-wrap items-center gap-4 pt-2">
+            <Link
+              href={`/blog/${post.slug}`}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white text-[#08214e] hover:bg-[#fff9eb] text-sm font-bold shadow-lg shadow-black/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              <BookOpen className="h-4 w-4 text-[#20509b]" />
+              <span>Read Full Deep-Dive</span>
+              <ArrowRight className="h-4 w-4 text-[#20509b]" />
             </Link>
 
-            <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-3 leading-relaxed">
-              {post.excerpt}
-            </p>
-          </div>
-
-          {/* Author & Footer Info */}
-          <div className="pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <Link
-              href={`/author/${post.author.id}`}
-              className="flex items-center gap-3 group/author"
+            <button
+              onClick={handleBookmarkToggle}
+              className={`inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-xs font-semibold glass-pill hover:bg-white/20 transition-all ${
+                isBookmarked ? "text-[#fdc035] border-[#fdc035]/60" : "text-white"
+              }`}
             >
+              <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
+              <span>{isBookmarked ? "Saved in List" : "Save for Later"}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Hero Cover Image & Author Card */}
+        <div className="lg:col-span-5 relative">
+          <Link
+            href={`/blog/${post.slug}`}
+            className="block relative aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 group"
+          >
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 480px"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#041536]/80 via-transparent to-transparent" />
+          </Link>
+
+          {/* Floating Author Pill */}
+          <Link
+            href={`/author/${post.author.id}`}
+            className="absolute -bottom-4 left-4 right-4 sm:left-6 sm:right-6 glass-pill p-3 rounded-xl flex items-center justify-between gap-3 text-xs hover:bg-white/25 transition-all"
+          >
+            <div className="flex items-center gap-3">
               <Image
                 src={post.author.avatar}
                 alt={post.author.name}
-                width={40}
-                height={40}
-                className="rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800"
+                width={36}
+                height={36}
+                className="rounded-full object-cover ring-2 ring-[#fdc035]"
               />
               <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-white group-hover/author:text-blue-600 transition-colors">
-                  {post.author.name}
-                </p>
-                <p className="text-xs text-slate-400">
-                  {formatDate(post.publishedAt)}
-                </p>
+                <p className="font-bold text-white">{post.author.name}</p>
+                <p className="text-[10px] text-blue-200">{post.author.role}</p>
               </div>
-            </Link>
-
-            <div className="flex items-center gap-3 text-xs text-slate-400 font-mono">
-              <span className="flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" />
-                {formatCompactNumber(post.views)}
-              </span>
-              <span className="flex items-center gap-1">
-                <Heart className="h-3.5 w-3.5 text-rose-500" />
-                {formatCompactNumber(post.likes)}
-              </span>
             </div>
-          </div>
+            <span className="text-[10px] font-semibold text-[#fdc035] bg-[#041536]/60 px-2 py-0.5 rounded-full">
+              Author
+            </span>
+          </Link>
         </div>
       </div>
     </article>

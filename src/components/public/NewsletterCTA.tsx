@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Mail, CheckCircle2 } from "lucide-react";
+import { Mail, CheckCircle2, Zap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export function NewsletterCTA() {
@@ -17,32 +17,35 @@ export function NewsletterCTA() {
       setLoading(false);
       setSubmitted(true);
       setEmail("");
-    }, 600);
+    }, 500);
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-900 via-indigo-950 to-slate-950 p-8 sm:p-12 text-white shadow-2xl border border-primary-500/20">
+    <div className="brand-atmosphere rounded-3xl p-8 sm:p-12 text-white shadow-2xl border border-blue-400/20 relative overflow-hidden">
       {/* Decorative Glow */}
-      <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary-500/20 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
+      <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-[#f4ae17]/20 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-[#3d76c6]/30 blur-3xl pointer-events-none" />
 
-      <div className="relative max-w-2xl mx-auto text-center space-y-4">
-        <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md text-primary-300 mx-auto mb-2 border border-white/10">
-          <Mail className="h-6 w-6" />
+      <div className="relative max-w-2xl mx-auto text-center space-y-5 z-10">
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[#f4ae17] text-[#041536] mx-auto shadow-md">
+          <Zap className="h-3.5 w-3.5 fill-[#041536]" />
+          Weekly Architectural Briefing
         </div>
 
-        <h3 className="text-2xl sm:text-3xl font-bold tracking-tight">
+        <h3 className="text-2xl sm:text-4xl font-extrabold tracking-tight font-heading leading-tight">
           Stay on the cutting edge of engineering
         </h3>
 
-        <p className="text-sm text-slate-300 leading-relaxed max-w-lg mx-auto">
-          Join 24,000+ senior developers and architects receiving our bi-weekly breakdown of distributed systems, Next.js architecture, and AI infrastructure.
+        <p className="text-sm text-blue-100/90 leading-relaxed max-w-lg mx-auto">
+          Join 28,000+ senior architects receiving our bi-weekly breakdown of distributed systems, Next.js internal benchmarks, and AI infrastructure.
         </p>
 
         {submitted ? (
-          <div className="flex items-center justify-center gap-2 text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 rounded-xl py-3 px-4 max-w-md mx-auto animate-in fade-in">
-            <CheckCircle2 className="h-5 w-5" />
-            <span className="text-sm font-medium">You&apos;re in! Check your inbox for the welcome digest.</span>
+          <div className="flex items-center justify-center gap-2 text-emerald-300 bg-emerald-950/70 border border-emerald-500/30 rounded-2xl py-3.5 px-5 max-w-md mx-auto animate-in fade-in">
+            <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+            <span className="text-sm font-semibold">
+              You&apos;re subscribed! Check your inbox for the welcome edition.
+            </span>
           </div>
         ) : (
           <form
@@ -55,20 +58,20 @@ export function NewsletterCTA() {
               placeholder="you@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 rounded-xl bg-white/10 backdrop-blur-md px-4 py-3 text-sm text-white placeholder:text-slate-400 border border-white/15 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              className="flex-1 rounded-xl bg-white/10 backdrop-blur-md px-4 py-3 text-sm text-white placeholder:text-blue-200 border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#fdc035]"
             />
             <Button
               type="submit"
               isLoading={loading}
-              className="bg-white text-slate-950 hover:bg-slate-100 font-semibold rounded-xl px-6"
+              className="bg-[#f4ae17] text-[#041536] hover:bg-[#fdc035] font-bold rounded-xl px-6 shadow-lg shadow-amber-500/20"
             >
-              Subscribe
+              Subscribe Free
             </Button>
           </form>
         )}
 
-        <p className="text-[11px] text-slate-400 pt-1">
-          No spam, ever. Unsubscribe at any time with a single click.
+        <p className="text-[11px] text-blue-200/80 pt-1">
+          Zero spam. Curated exclusively by principal engineers. Unsubscribe anytime.
         </p>
       </div>
     </div>
