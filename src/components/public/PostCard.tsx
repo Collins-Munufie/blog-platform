@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Eye, Heart, Bookmark, ArrowRight } from "lucide-react";
+import { Clock, Eye, Heart, Bookmark, MessageCircle, Layers } from "lucide-react";
 import { Post } from "@/lib/types";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
@@ -23,9 +23,7 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
         localStorage.getItem("devlog_saved_bookmarks") || "[]"
       ) as string[];
       setIsBookmarked(saved.includes(post.id));
-    } catch {
-      // Ignore
-    }
+    } catch {}
   }, [post.id]);
 
   const handleBookmarkToggle = (e: React.MouseEvent) => {
@@ -41,23 +39,26 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
         const next = saved.filter((id) => id !== post.id);
         localStorage.setItem("devlog_saved_bookmarks", JSON.stringify(next));
         setIsBookmarked(false);
-        toast({
-          title: "Removed from Reading List",
-          type: "info",
-        });
+        toast({ title: "Removed from Reading List", type: "info" });
       } else {
         const next = [...saved, post.id];
         localStorage.setItem("devlog_saved_bookmarks", JSON.stringify(next));
         setIsBookmarked(true);
         toast({
           title: "Saved to Reading List",
-          description: "Access this article anytime in your Saved Stories.",
+          description: "Access this story anytime in your Saved collection.",
           type: "success",
         });
       }
-    } catch {
-      // Ignore
-    }
+    } catch {}
+  };
+
+  const handleWhatsAppShare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = typeof window !== "undefined" ? `${window.location.origin}/blog/${post.slug}` : "";
+    const text = encodeURIComponent(`Read on khophi_the_blogger: "${post.title}"\n${url}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
   };
 
   if (variant === "horizontal") {
@@ -79,29 +80,41 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
         <div className="flex flex-col justify-between flex-1 space-y-3">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <Link href={`/categories?slug=${post.category.slug}`}>
-                <span className="brand-tag-gold text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                  {post.category.name}
-                </span>
-              </Link>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-[#93a0b4]">
-                  {post.readingTimeMinutes} min read
-                </span>
+              <div className="flex items-center gap-1.5">
+                <Link href={`/categories?slug=${post.category.slug}`}>
+                  <span className="brand-tag-gold text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                    {post.category.name}
+                  </span>
+                </Link>
+                {post.series && (
+                  <span className="text-[10px] font-bold text-[#20509b] dark:text-[#8ab1e3] bg-[#eef3fa] dark:bg-[#12346e] px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Layers className="h-2.5 w-2.5" /> Series
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleWhatsAppShare}
+                  className="p-1 rounded-lg text-[#25D366] hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                  title="Share on WhatsApp"
+                >
+                  <MessageCircle className="h-3.5 w-3.5 fill-current" />
+                </button>
                 <button
                   onClick={handleBookmarkToggle}
-                  className={`p-1.5 rounded-lg text-slate-400 hover:text-[#08214e] dark:hover:text-white transition-colors ${
-                    isBookmarked ? "text-[#f4ae17]" : ""
+                  className={`p-1 rounded-lg text-slate-400 hover:text-[#08214e] dark:hover:text-white ${
+                    isBookmarked ? "text-[#f59e0b]" : ""
                   }`}
-                  title={isBookmarked ? "Remove bookmark" : "Save for later"}
+                  title="Bookmark"
                 >
-                  <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-[#f4ae17]" : ""}`} />
+                  <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? "fill-[#f59e0b]" : ""}`} />
                 </button>
               </div>
             </div>
 
             <Link href={`/blog/${post.slug}`}>
-              <h3 className="text-base font-bold text-[#08214e] dark:text-white group-hover:text-[#20509b] dark:group-hover:text-[#6394d6] transition-colors line-clamp-2 font-heading">
+              <h3 className="text-base font-bold text-[#08214e] dark:text-white group-hover:text-[#20509b] dark:group-hover:text-[#8ab1e3] transition-colors line-clamp-2 font-heading">
                 {post.title}
               </h3>
             </Link>
@@ -114,7 +127,7 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
           <div className="flex items-center justify-between pt-2 border-t border-[#e2e8f2] dark:border-[#1e3a6a] text-xs text-[#93a0b4]">
             <Link
               href={`/author/${post.author.id}`}
-              className="hover:text-[#08214e] dark:hover:text-white transition-colors font-medium"
+              className="hover:text-[#08214e] dark:hover:text-white transition-colors font-semibold"
             >
               {post.author.name} • {formatDate(post.publishedAt)}
             </Link>
@@ -147,20 +160,35 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 flex items-center gap-1.5">
             <span className="brand-tag-gold text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
               {post.category.name}
             </span>
+            {post.series && (
+              <span className="text-[10px] font-bold bg-[#041536]/80 text-[#f59e0b] px-2 py-0.5 rounded-full backdrop-blur-sm">
+                Series
+              </span>
+            )}
           </div>
-          <button
-            onClick={handleBookmarkToggle}
-            className={`absolute top-3 right-3 p-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 shadow-sm backdrop-blur-sm transition-all hover:scale-105 ${
-              isBookmarked ? "text-[#f4ae17]" : "text-slate-600 dark:text-slate-300"
-            }`}
-            title={isBookmarked ? "Remove bookmark" : "Save for later"}
-          >
-            <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-[#f4ae17]" : ""}`} />
-          </button>
+
+          <div className="absolute top-3 right-3 flex items-center gap-1">
+            <button
+              onClick={handleWhatsAppShare}
+              className="p-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 text-[#25D366] shadow-sm backdrop-blur-sm hover:scale-105 transition-all"
+              title="Share on WhatsApp"
+            >
+              <MessageCircle className="h-3.5 w-3.5 fill-current" />
+            </button>
+            <button
+              onClick={handleBookmarkToggle}
+              className={`p-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 shadow-sm backdrop-blur-sm transition-all hover:scale-105 ${
+                isBookmarked ? "text-[#f59e0b]" : "text-slate-600 dark:text-slate-300"
+              }`}
+              title={isBookmarked ? "Remove bookmark" : "Save for later"}
+            >
+              <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? "fill-[#f59e0b]" : ""}`} />
+            </button>
+          </div>
         </Link>
 
         {/* Card Body */}
@@ -173,7 +201,7 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
           </div>
 
           <Link href={`/blog/${post.slug}`}>
-            <h3 className="text-base sm:text-lg font-bold text-[#08214e] dark:text-white group-hover:text-[#20509b] dark:group-hover:text-[#6394d6] transition-colors line-clamp-2 font-heading">
+            <h3 className="text-base sm:text-lg font-bold text-[#08214e] dark:text-white group-hover:text-[#20509b] dark:group-hover:text-[#8ab1e3] transition-colors line-clamp-2 font-heading">
               {post.title}
             </h3>
           </Link>

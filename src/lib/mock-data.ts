@@ -1,444 +1,377 @@
-import { Author, Category, Tag, Post, Comment, AnalyticsSummary } from "./types";
+import { Author, Category, Tag, Post, Series, MediaItem } from './types';
 
 export const MOCK_AUTHORS: Author[] = [
   {
-    id: "auth-1",
-    name: "Elena Rostova",
-    handle: "erostova",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    role: "Staff Infrastructure Engineer",
-    bio: "Passionate about distributed systems, edge computing, and modern TypeScript architecture. Writing technical deep-dives.",
-    twitter: "https://twitter.com",
-    github: "https://github.com",
-    website: "https://elena.dev",
+    id: 'auth-khophi',
+    name: 'Khophi',
+    handle: 'khophi_the_blogger',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+    bio: 'Accra-based Tech Journalist, Software Architect, and Digital Storyteller. Chronicling the African tech boom, Afrobeats culture, and Ghana’s evolving socio-economic landscape.',
+    role: 'Founder & Lead Editor',
+    location: 'Accra, Ghana 🇬🇭',
+    twitter: 'https://twitter.com/khophi_blogger',
+    github: 'https://github.com/khophi',
+    website: 'https://khophitheblogger.com',
+    whatsapp: 'https://wa.me/233240000000',
   },
   {
-    id: "auth-2",
-    name: "Marcus Vance",
-    handle: "marcusv",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-    role: "Principal Product Designer & Front-End Architect",
-    bio: "Bridging the chasm between design systems and high-performance frontends. Core contributor to UI toolkits.",
-    twitter: "https://twitter.com",
-    github: "https://github.com",
+    id: 'auth-kwame',
+    name: 'Kwame Mensah',
+    handle: 'kwamemensah',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
+    bio: 'Fintech Analyst & Mobile Money researcher across West Africa.',
+    role: 'Contributing Editor (Fintech & Economics)',
+    location: 'Kumasi / Accra, Ghana',
+    twitter: 'https://twitter.com/kwame_fintech',
   },
   {
-    id: "auth-3",
-    name: "Aria Chen",
-    handle: "ariachen",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
-    role: "AI Research & Systems Engineer",
-    bio: "Exploring agentic workflows, LLM distillation, and real-time streaming architectures.",
-    github: "https://github.com",
-  },
+    id: 'auth-ama',
+    name: 'Ama Serwaa',
+    handle: 'amaserwaa',
+    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80',
+    bio: 'Culture critic, Afrobeats podcast host, and lifestyle chronicler.',
+    role: 'Culture & Entertainment Lead',
+    location: 'Accra, Ghana',
+    twitter: 'https://twitter.com/ama_culture',
+  }
 ];
 
 export const MOCK_CATEGORIES: Category[] = [
   {
-    id: "cat-1",
-    name: "Engineering & Architecture",
-    slug: "engineering-architecture",
-    description: "Deep technical articles on distributed systems, databases, and microservices.",
-    color: "indigo",
+    id: 'cat-tech',
+    name: 'Tech & Startups',
+    slug: 'tech-startups',
+    description: 'Silicon Accra, Mobile Money innovations, AI infrastructure, and West African developer ecosystems.',
+    color: '#2563eb',
     postCount: 14,
   },
   {
-    id: "cat-2",
-    name: "Frontend & UI Systems",
-    slug: "frontend-ui-systems",
-    description: "Modern web architecture, React performance, CSS layouts, and design systems.",
-    color: "violet",
-    postCount: 22,
-  },
-  {
-    id: "cat-3",
-    name: "AI & Agentic Systems",
-    slug: "ai-agentic-systems",
-    description: "Generative models, multi-agent frameworks, and building AI-driven software.",
-    color: "emerald",
+    id: 'cat-business',
+    name: 'Business & Economy',
+    slug: 'business-economy',
+    description: 'AfCFTA trade dynamics, Ghana Cedi exchange movements, SME entrepreneurship, and agritech.',
+    color: '#059669',
     postCount: 9,
   },
   {
-    id: "cat-4",
-    name: "DevOps & Cloud Native",
-    slug: "devops-cloud-native",
-    description: "Kubernetes, CI/CD pipelines, edge networks, and observability.",
-    color: "amber",
+    id: 'cat-entertainment',
+    name: 'Entertainment & Culture',
+    slug: 'entertainment-culture',
+    description: 'Afrobeats global dominance, Chale Wote street art festival, Ghanaian cinema, and creative arts.',
+    color: '#d97706',
+    postCount: 12,
+  },
+  {
+    id: 'cat-politics',
+    name: 'Politics & Governance',
+    slug: 'politics-governance',
+    description: 'Parliamentary bills, civic tech transparency, election analytics, and public policy.',
+    color: '#7c3aed',
+    postCount: 7,
+  },
+  {
+    id: 'cat-sports',
+    name: 'Sports & Football',
+    slug: 'sports-football',
+    description: 'Ghana Black Stars, Premier League coverage, local academy scouting, and African football tactics.',
+    color: '#dc2626',
     postCount: 8,
+  },
+  {
+    id: 'cat-lifestyle',
+    name: 'Lifestyle & Living',
+    slug: 'lifestyle-living',
+    description: 'Accra city guides, dining, tech nomad living in Ghana, and heritage travel destinations.',
+    color: '#db2777',
+    postCount: 6,
+  },
+];
+
+export const MOCK_SERIES: Series[] = [
+  {
+    id: 'series-silicon-accra',
+    slug: 'silicon-accra-2026',
+    title: 'Silicon Accra: The 2026 Tech Frontier',
+    description: 'An in-depth 4-part investigation into venture funding, developer hubs in Osu and East Legon, and satellite internet deployment.',
+    coverImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80',
+    postCount: 4,
+  },
+  {
+    id: 'series-momo-revolution',
+    slug: 'momo-and-fintech-playbook',
+    title: 'The Mobile Money & Cashless Playbook',
+    description: 'How interoperability, QR merchant payments, and cross-border remittances are rewriting West African commerce.',
+    coverImage: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&auto=format&fit=crop&q=80',
+    postCount: 3,
+  },
+  {
+    id: 'series-black-stars',
+    slug: 'black-stars-tactical-playbook',
+    title: 'Black Stars: Tactical Blueprint & AFCON Road',
+    description: 'Data analytics, player progression metrics, and coaching breakdown for Ghana’s national football squad.',
+    coverImage: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&auto=format&fit=crop&q=80',
+    postCount: 3,
   },
 ];
 
 export const MOCK_TAGS: Tag[] = [
-  { id: "tag-1", name: "Next.js", slug: "nextjs", postCount: 18 },
-  { id: "tag-2", name: "TypeScript", slug: "typescript", postCount: 25 },
-  { id: "tag-3", name: "PostgreSQL", slug: "postgresql", postCount: 11 },
-  { id: "tag-4", name: "System Design", slug: "system-design", postCount: 14 },
-  { id: "tag-5", name: "Tailwind CSS", slug: "tailwind-css", postCount: 16 },
-  { id: "tag-6", name: "LLMs", slug: "llms", postCount: 9 },
-  { id: "tag-7", name: "Performance", slug: "performance", postCount: 12 },
-  { id: "tag-8", name: "Architecture", slug: "architecture", postCount: 15 },
+  { id: 'tag-1', name: 'Fintech', slug: 'fintech', postCount: 10 },
+  { id: 'tag-2', name: 'Mobile Money', slug: 'mobile-money', postCount: 8 },
+  { id: 'tag-3', name: 'Afrobeats', slug: 'afrobeats', postCount: 6 },
+  { id: 'tag-4', name: 'Accra Startups', slug: 'accra-startups', postCount: 7 },
+  { id: 'tag-5', name: 'Black Stars', slug: 'black-stars', postCount: 5 },
+  { id: 'tag-6', name: 'Ghana Cedi', slug: 'ghana-cedi', postCount: 4 },
+  { id: 'tag-7', name: 'Next.js & Web', slug: 'nextjs-web', postCount: 9 },
+  { id: 'tag-8', name: 'Civic Tech', slug: 'civic-tech', postCount: 3 },
 ];
 
 export const MOCK_POSTS: Post[] = [
   {
-    id: "post-1",
-    slug: "mastering-nextjs-server-actions-and-caching",
-    title: "Mastering Next.js Server Actions, Caching Layers, and Edge Mutations",
-    excerpt: "A comprehensive deep dive into building ultra-fast web applications with Next.js App Router, deterministic cache invalidation, and secure server actions.",
+    id: 'post-1',
+    slug: 'accra-tech-hub-fintech-boom-2026',
+    title: 'The Silicon Accra Boom: How Ghana Is Building West Africa’s Most Resilient Fintech Corridor',
+    excerpt: 'From instant QR merchant settlements to cross-border remittances under AfCFTA, Accra’s tech ecosystem has matured into a global powerhouse.',
     content: `
-### Introduction
+# The Silicon Accra Boom: West Africa's Fintech Frontier
 
-Modern web architecture is shifting rapidly toward unified server-client models. In this guide, we explore how Next.js App Router redefines data mutation, edge caching, and server-side safety with zero client runtime overhead for pure data layers.
+Accra is undergoing an unprecedented digital renaissance. Walk through Airport City, Osu, or East Legon, and you will encounter a thriving ecosystem of engineers, product founders, and venture builders rewriting the financial architecture of West Africa.
+
+## 1. The Mobile Money Interoperability Advantage
+
+Ghana's landmark **Mobile Money Interoperability (MMI)** system laid the bedrock for what is now the most frictionless peer-to-peer and merchant settlement network on the continent. In 2025 alone, transaction volumes surpassed 2.1 trillion GHS.
 
 \`\`\`typescript
-// Server Action with validation & revalidation
-'use server'
+interface MomoTransaction {
+  network: 'MTN_MOMO' | 'TELECEL_CASH' | 'AT_MONEY';
+  amountGhs: number;
+  recipientPhone: string;
+  instantSettlement: boolean;
+}
 
-import { revalidateTag } from 'next/cache';
-import { z } from 'zod';
-
-const CreatePostSchema = z.object({
-  title: z.string().min(5),
-  content: z.string().min(20),
-});
-
-export async function createPostAction(formData: FormData) {
-  const parsed = CreatePostSchema.safeParse({
-    title: formData.get('title'),
-    content: formData.get('content'),
+export async function processGhanaianMomo(tx: MomoTransaction) {
+  // Direct integration with Ghana Interbank Payment and Settlement Systems (GhIPSS)
+  return await ghipssGateway.dispatch({
+    ...tx,
+    timestamp: new Date().toISOString(),
+    currency: 'GHS',
   });
-
-  if (!parsed.success) {
-    return { error: 'Validation failed' };
-  }
-
-  // Database persistence
-  await db.post.create({ data: parsed.data });
-  
-  // Deterministic cache purge
-  revalidateTag('posts-feed');
-  return { success: true };
 }
 \`\`\`
 
-### Caching Tiers Explained
+## 2. Cross-Border Trade & AfCFTA Integration
 
-When architecting a high-throughput platform, caching isn't just about saving database roundtrips—it dictates the entire user experience and latency budget.
+With the **AfCFTA Secretariat headquartered in Accra**, local startups are piloting instant currency conversion rails that allow a trader in Makola Market to invoice a partner in Nairobi or Abidjan in seconds, bypassing expensive multi-hop correspondent banks.
 
-> **Key Rule**: Never rely on a single global cache. Segment your cache into Request Memoization, Data Cache, Full Route Cache, and Router Cache.
+> [!NOTE]
+> *“The goal is not just digital payments, but sovereign financial autonomy across African trade corridors.”* — Khophi
 
-1. **Request Memoization**: Deduplicates identical \`fetch\` requests within a single React component render tree.
-2. **Data Cache**: Persistent HTTP cache across user sessions and server restarts.
-3. **Full Route Cache**: Static HTML/RSC payloads cached at build or ISR revalidation time.
-4. **Router Cache**: Client-side in-memory cache preserved during page transitions.
+## 3. What Lies Ahead
 
-### Optimistic UI & Progressive Enhancement
-
-By combining React's \`useOptimistic\` hook with Server Actions, users perceive instantaneous mutations while background validation runs smoothly:
-
-\`\`\`tsx
-'use client'
-
-import { useOptimistic } from 'react';
-
-export function LikeButton({ post, onLike }) {
-  const [optimisticLikes, addOptimisticLike] = useOptimistic(
-    post.likes,
-    (state, amount: number) => state + amount
-  );
-
-  return (
-    <button
-      onClick={async () => {
-        addOptimisticLike(1);
-        await onLike(post.id);
-      }}
-      className="btn-interactive"
-    >
-      ❤️ {optimisticLikes}
-    </button>
-  );
-}
-\`\`\`
-
-### Conclusion
-
-Leveraging these server-first primitives guarantees lower bundle sizes, instantaneous edge delivery, and rock-solid reliability across unpredictable client networks.
-`,
-    coverImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&auto=format&fit=crop&q=80",
+With high-speed fiber deployments, localized AI developer bootcamps, and supportive regulatory sandboxes from the Bank of Ghana, Accra is no longer just participating in tech — it is setting the tempo.
+    `,
+    coverImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80',
     category: MOCK_CATEGORIES[0],
-    tags: [MOCK_TAGS[0], MOCK_TAGS[1], MOCK_TAGS[6]],
+    tags: [MOCK_TAGS[0], MOCK_TAGS[1], MOCK_TAGS[3]],
     author: MOCK_AUTHORS[0],
-    status: "published",
-    publishedAt: "2026-08-24T14:30:00Z",
-    readingTimeMinutes: 7,
-    views: 14280,
+    status: 'published',
+    language: 'en',
+    series: {
+      id: 'series-silicon-accra',
+      title: 'Silicon Accra: The 2026 Tech Frontier',
+      order: 1,
+    },
+    publishedAt: '2026-08-30T10:00:00Z',
+    readingTimeMinutes: 6,
+    views: 18450,
     likes: 842,
+    reactions: { love: 520, fire: 630, clap: 410, insightful: 280 },
     bookmarksCount: 310,
     featured: true,
     seo: {
-      metaTitle: "Mastering Next.js Server Actions & Caching Strategies",
-      metaDescription: "Learn how to optimize Next.js server actions, cache tags, and optimistic UI for maximum performance.",
+      metaTitle: 'The Silicon Accra Boom: Ghana Fintech 2026 | khophi_the_blogger',
+      metaDescription: 'How Accra is building West Africa’s most resilient fintech corridor with mobile money interoperability and AfCFTA integration.',
     },
   },
   {
-    id: "post-2",
-    slug: "design-systems-at-scale-tokens-and-accessibility",
-    title: "Building Resilient Design Systems: Semantic Tokens, Micro-Interactions, and A11y",
-    excerpt: "How to structure multi-brand CSS tokens, accessible component primitives, and delightful micro-interactions without performance compromises.",
+    id: 'post-2',
+    slug: 'ghana-afrobeats-global-dominance-and-creative-economy',
+    title: 'From Highlife Roots to Global Streaming: The Economics of Modern Ghanaian Music & Festivals',
+    excerpt: 'How AfroFuture, Detty December, and independent streaming catalogs are transforming Ghana into the global capital of African creative arts.',
     content: `
-### The Core Anatomy of Modern Design Tokens
+# The Creative Economy of Modern Ghana
 
-Design tokens are the visual atoms of your application. When scaling a frontend across multiple products or platforms, hardcoding hex codes or pixel dimensions creates compounding technical debt.
+Every December, the world converges on Accra. What began as homecoming celebrations has evolved into a multi-million dollar creative economy bridging traditional Highlife rhythms with modern Afrobeats, Amapiano, and Drill.
 
-\`\`\`css
-:root {
-  /* Primitive Tokens */
-  --palette-indigo-500: #6366f1;
-  --palette-slate-900: #0f172a;
+## Cultural Infrastructure & Global Tourism
 
-  /* Semantic Tokens */
-  --color-brand-primary: var(--palette-indigo-500);
-  --color-surface-background: #ffffff;
-  --color-text-primary: var(--palette-slate-900);
-}
+From AfroFuture to the Chale Wote Street Art Festival in Jamestown, Ghana's creative sector contributes significantly to hospitality, airline traffic, and local artisan entrepreneurship.
 
-.dark {
-  --color-surface-background: #090d16;
-  --color-text-primary: #f8fafc;
-}
-\`\`\`
-
-### Accessibility by Construction (A11y)
-
-Never compromise accessibility for aesthetic flair. Every custom dropdown, modal dialog, and tooltip must adhere to WAI-ARIA authoring practices:
-
-* **Keyboard Navigation:** Full support for \`Tab\`, \`Shift+Tab\`, \`Enter\`, \`Space\`, and \`Escape\`.
-* **Focus Trapping:** Prevent focus from escaping modal overlays.
-* **Screen Reader Announcers:** Proper use of \`aria-live="polite"\` for dynamic counters and toast notifications.
-
-### Micro-Interactions that Delight
-
-Smooth transitions create a sense of tactile physics. Keep durations between 150ms and 250ms with custom cubic-bezier curves (\`cubic-bezier(0.16, 1, 0.3, 1)\`) for responsive, snappy feel.
-`,
-    coverImage: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=1200&auto=format&fit=crop&q=80",
-    category: MOCK_CATEGORIES[1],
-    tags: [MOCK_TAGS[4], MOCK_TAGS[1]],
-    author: MOCK_AUTHORS[1],
-    status: "published",
-    publishedAt: "2026-08-20T09:15:00Z",
-    readingTimeMinutes: 5,
-    views: 9340,
-    likes: 620,
-    bookmarksCount: 195,
-    featured: false,
-  },
-  {
-    id: "post-3",
-    slug: "designing-scalable-multi-agent-ai-architectures",
-    title: "Designing Scalable Multi-Agent AI Architectures for Real-Time Coding",
-    excerpt: "Exploring actor-model concurrency, state synchronization, and reactive sandboxes for orchestrating collaborative AI subagents in complex development tasks.",
-    content: `
-### The Multi-Agent Paradigm
-
-When autonomous AI systems tackle complex coding or research tasks, a single monolithic prompt fails due to context rot and attention dilution. Orchestrating specialized subagents provides compartmentalized reasoning.
-
-\`\`\`mermaid
-graph LR
-  User --> Orchestrator
-  Orchestrator --> AgentA[Research Subagent]
-  Orchestrator --> AgentB[Architect Subagent]
-  Orchestrator --> AgentC[Testing Subagent]
-  AgentA --> Knowledge[(Code Graph)]
-  AgentB --> Workspace[(Sandbox)]
-  AgentC --> Verification[(Test Runner)]
-\`\`\`
-
-### Inter-Agent Communication Protocols
-
-Agents communicate via structured messaging protocols with verifiable tool schemas. Key principles:
-
-1. **Explicit Role Boundaries:** Each agent has a focused system prompt and specialized tool access.
-2. **Deterministic Sandboxes:** All write operations run in sandboxed workspaces with diff reviews.
-3. **Structured Handoffs:** Structured artifacts (implementation plans, test reports) guarantee loss-less state transfers.
-
-\`\`\`json
-{
-  "sender": "research-agent-01",
-  "recipient": "planner-agent",
-  "action": "TASK_COMPLETED",
-  "payload": {
-    "summary": "Found 3 potential race conditions in websocket worker",
-    "affectedFiles": ["src/workers/ws.ts", "src/lib/socket-pool.ts"]
-  }
-}
-\`\`\`
-
-### Real-World Performance & Cost Tuning
-
-To prevent astronomical token usage:
-* Use light models (\`Flash\` tier) for routine file lookups and grep passes.
-* Reserve deep reasoning models for complex refactors, architectural designs, and root cause debugging.
-`,
-    coverImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80",
+* **Decentralized Distribution**: Independent Ghanaian musicians now reach global listeners on Spotify and Apple Music directly from home studios in Tema and Kumasi.
+* **Live Music Tourism**: December in Ghana injects over $300M into the national economy.
+    `,
+    coverImage: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&auto=format&fit=crop&q=80',
     category: MOCK_CATEGORIES[2],
-    tags: [MOCK_TAGS[5], MOCK_TAGS[3], MOCK_TAGS[7]],
+    tags: [MOCK_TAGS[2]],
     author: MOCK_AUTHORS[2],
-    status: "published",
-    publishedAt: "2026-08-16T11:00:00Z",
-    readingTimeMinutes: 9,
-    views: 18450,
-    likes: 1320,
-    bookmarksCount: 540,
+    status: 'published',
+    language: 'en',
+    publishedAt: '2026-08-28T14:30:00Z',
+    readingTimeMinutes: 5,
+    views: 12200,
+    likes: 670,
+    reactions: { love: 490, fire: 510, clap: 320, insightful: 110 },
+    bookmarksCount: 185,
     featured: true,
   },
   {
-    id: "post-4",
-    slug: "zero-downtime-postgresql-migrations-at-scale",
-    title: "Zero-Downtime PostgreSQL Schema Migrations in High-Traffic Systems",
-    excerpt: "How to perform column renames, index additions, and table partitioning without holding exclusive table locks or dropping user requests.",
+    id: 'post-3',
+    slug: 'black-stars-tactical-blueprint-afcon-2027',
+    title: 'Black Stars Tactical Overhaul: High-Pressing Analytics and Young Talents in Europe',
+    excerpt: 'A data-driven breakdown of Ghana’s national football squad: transition speeds, midfield ball retention, and the scouting revolution.',
     content: `
-### The Table Locking Trap
+# Rebuilding the Black Stars with Data Analytics
 
-In high-write databases, executing a naive \`ALTER TABLE ADD COLUMN ... DEFAULT 'foo'\` or adding an index synchronously can lock out incoming transactions, causing cascading connection pool exhaustion.
+Ghanaian football has always possessed raw flair and technical brilliance. In this tactical deep dive, we examine how the technical directorate is integrating data tracking and tactical pressing to prepare for the upcoming continental championship.
 
-\`\`\`sql
--- ❌ BAD: Exclusive table lock while indexing millions of rows
-CREATE INDEX idx_users_email ON users(email);
-
--- ✅ GOOD: Non-blocking concurrent index creation
-CREATE INDEX CONCURRENTLY idx_users_email ON users(email);
-\`\`\`
-
-### The Expand/Contract Migration Pattern
-
-For column renames or type modifications:
-
-1. **Expand**: Add the new column nullable.
-2. **Dual-Write**: Update application code to write to both old and new columns.
-3. **Backfill**: Incrementally backfill existing rows in manageable batches (e.g. 5,000 rows per chunk).
-4. **Contract**: Switch reads to the new column, and safely drop the old column once verified.
-
-### Safe Constraint Validation
-
-Never validate foreign keys or check constraints on large tables in one step:
-
-\`\`\`sql
--- Step 1: Add constraint NOT VALID (instantaneous metadata lock)
-ALTER TABLE orders 
-ADD CONSTRAINT fk_orders_user 
-FOREIGN KEY (user_id) REFERENCES users(id) 
-NOT VALID;
-
--- Step 2: Validate without locking new writes
-ALTER TABLE orders VALIDATE CONSTRAINT fk_orders_user;
-\`\`\`
-`,
-    coverImage: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1200&auto=format&fit=crop&q=80",
-    category: MOCK_CATEGORIES[0],
-    tags: [MOCK_TAGS[2], MOCK_TAGS[3], MOCK_TAGS[7]],
+## Key Tactical Metrics
+1. **Transition Velocity**: Moving the ball from defensive third to final third in under 8 seconds.
+2. **Defensive Compactness**: Pressing as a unified block rather than individual isolation.
+    `,
+    coverImage: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200&auto=format&fit=crop&q=80',
+    category: MOCK_CATEGORIES[4],
+    tags: [MOCK_TAGS[4]],
     author: MOCK_AUTHORS[0],
-    status: "published",
-    publishedAt: "2026-08-10T16:45:00Z",
-    readingTimeMinutes: 6,
-    views: 11200,
-    likes: 740,
-    bookmarksCount: 280,
-    featured: false,
+    status: 'published',
+    language: 'en',
+    series: {
+      id: 'series-black-stars',
+      title: 'Black Stars: Tactical Blueprint & AFCON Road',
+      order: 1,
+    },
+    publishedAt: '2026-08-25T09:15:00Z',
+    readingTimeMinutes: 7,
+    views: 9800,
+    likes: 540,
+    reactions: { love: 310, fire: 420, clap: 290, insightful: 180 },
+    bookmarksCount: 140,
+    featured: true,
   },
   {
-    id: "post-5",
-    slug: "draft-future-of-local-first-software",
-    title: "The Architecture of Local-First Software: CRDTs, SQLite, and Sync Engines",
-    excerpt: "Why the future of productivity applications relies on instant local mutations with offline-first synchronization protocols.",
+    id: 'post-4',
+    slug: 'ghana-cedi-economic-outlook-afcfta-trade',
+    title: 'Navigating the Ghana Cedi: Inflation Dynamics, Gold-for-Oil Policy, and SME Resilience',
+    excerpt: 'An objective analysis of macroeconomic fiscal policy, gold reserves, and how small businesses in Kumasi and Accra are hedging currency swings.',
     content: `
-### Draft Content
+# Ghana's Macroeconomic Realities & SME Playbooks
 
-Local-first software combines the responsiveness and data ownership of desktop software with the real-time collaboration of modern web apps.
-
-* **Conflict-free Replicated Data Types (CRDTs)**: Merging edits without central consensus.
-* **Embedded SQLite**: Zero-latency reads straight from browser WASM or client database.
-* **Sync Engine**: Efficient delta synchronization over WebSockets.
-`,
-    coverImage: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80",
-    category: MOCK_CATEGORIES[0],
-    tags: [MOCK_TAGS[1], MOCK_TAGS[3]],
+Managing currency volatility has pushed Ghanaian entrepreneurs to become some of the sharpest financial operators in Africa. We explore currency stabilization policies, export incentives, and digital hedging tools.
+    `,
+    coverImage: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1200&auto=format&fit=crop&q=80',
+    category: MOCK_CATEGORIES[1],
+    tags: [MOCK_TAGS[5], MOCK_TAGS[0]],
     author: MOCK_AUTHORS[1],
-    status: "draft",
-    publishedAt: "2026-09-02T10:00:00Z",
-    readingTimeMinutes: 4,
-    views: 0,
-    likes: 0,
-    bookmarksCount: 0,
-    featured: false,
+    status: 'published',
+    language: 'en',
+    publishedAt: '2026-08-20T11:00:00Z',
+    readingTimeMinutes: 6,
+    views: 8400,
+    likes: 390,
+    reactions: { love: 180, fire: 210, clap: 350, insightful: 290 },
+    bookmarksCount: 98,
+  },
+  {
+    id: 'post-5',
+    slug: 'living-in-accra-tech-nomad-guide',
+    title: 'The Tech Nomad’s Guide to Living in Accra: Coworking Hubs, High-Speed Fiber & Hidden Cafes',
+    excerpt: 'Everything you need to know about setting up a remote workstation in Cantonments, Labone, and Osu, including internet providers and food spots.',
+    content: `
+# The Digital Nomad Experience in Accra
+
+Why global engineers and African diaspora professionals are choosing Accra as their remote work home base. Top coworking spaces, fiber connections, and community meetups.
+    `,
+    coverImage: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200&auto=format&fit=crop&q=80',
+    category: MOCK_CATEGORIES[5],
+    tags: [MOCK_TAGS[3]],
+    author: MOCK_AUTHORS[0],
+    status: 'published',
+    language: 'en',
+    publishedAt: '2026-08-15T08:30:00Z',
+    readingTimeMinutes: 5,
+    views: 7600,
+    likes: 410,
+    reactions: { love: 350, fire: 280, clap: 210, insightful: 95 },
+    bookmarksCount: 220,
+  }
+];
+
+export const MOCK_MEDIA_ITEMS: MediaItem[] = [
+  {
+    id: 'media-1',
+    name: 'accra-skyline-evening.jpg',
+    url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80',
+    size: '1.4 MB',
+    dimensions: '1920x1080',
+    category: 'Architecture & City',
+    uploadedAt: '2026-08-30',
+  },
+  {
+    id: 'media-2',
+    name: 'afrobeats-festival-lights.jpg',
+    url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&auto=format&fit=crop&q=80',
+    size: '2.1 MB',
+    dimensions: '2048x1365',
+    category: 'Culture & Events',
+    uploadedAt: '2026-08-28',
+  },
+  {
+    id: 'media-3',
+    name: 'ghana-football-match.jpg',
+    url: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200&auto=format&fit=crop&q=80',
+    size: '980 KB',
+    dimensions: '1600x1066',
+    category: 'Sports',
+    uploadedAt: '2026-08-25',
   },
 ];
 
-export const MOCK_COMMENTS: Comment[] = [
+export const MOCK_COMMENTS = [
   {
-    id: "comm-1",
-    postId: "post-1",
+    id: 'comm-1',
+    postId: 'post-1',
     author: {
-      name: "David Kim",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80",
-      handle: "davidk",
+      name: 'Kofi Mensah',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+      handle: 'kofimensah',
     },
-    content: "The breakdown of the 4 caching tiers in Next.js is one of the clearest explanations I've read. The distinction between Data Cache and Request Memoization cleared up a bug we had in production last week!",
-    createdAt: "2026-08-25T10:14:00Z",
+    content: 'Brilliant breakdown of the GhIPSS settlement mechanics, Khophi! The interoperability between mobile money wallets and commercial bank accounts has completely transformed merchant payments in Accra.',
+    createdAt: '2026-08-30T12:30:00Z',
     likes: 24,
     replies: [
       {
-        id: "comm-1-1",
-        postId: "post-1",
+        id: 'comm-1-reply-1',
+        postId: 'post-1',
         author: {
-          name: "Elena Rostova",
-          avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
-          handle: "erostova",
+          name: 'Khophi',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          handle: 'khophi_the_blogger',
         },
-        content: "Thanks David! Glad it helped. Make sure to check out `revalidateTag` for multi-node deployments as well.",
-        createdAt: "2026-08-25T11:02:00Z",
-        likes: 12,
-      },
+        content: 'Thanks Kofi! Next week we are releasing Part 2 analyzing cross-border settlements with Abidjan under AfCFTA.',
+        createdAt: '2026-08-30T13:00:00Z',
+        likes: 18,
+      }
     ],
   },
   {
-    id: "comm-2",
-    postId: "post-1",
+    id: 'comm-2',
+    postId: 'post-1',
     author: {
-      name: "Sarah Jenkins",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-      handle: "sarahj_dev",
+      name: 'Esi Nyarko',
+      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
+      handle: 'esinyarko',
     },
-    content: "How does this approach compare when using a third-party caching layer like Redis or Cloudflare Workers KV in front of Next.js?",
-    createdAt: "2026-08-26T14:40:00Z",
-    likes: 8,
-  },
+    content: 'Shared this to our developer WhatsApp group in East Legon. Spot on analysis.',
+    createdAt: '2026-08-30T14:15:00Z',
+    likes: 15,
+  }
 ];
 
-export const MOCK_ANALYTICS: AnalyticsSummary = {
-  totalViews: 53270,
-  totalLikes: 3522,
-  totalComments: 184,
-  avgReadTimeMinutes: 6.4,
-  viewsTrend: [
-    { date: "Aug 1", views: 1200, visitors: 940 },
-    { date: "Aug 5", views: 1840, visitors: 1420 },
-    { date: "Aug 10", views: 2450, visitors: 1890 },
-    { date: "Aug 15", views: 3100, visitors: 2400 },
-    { date: "Aug 20", views: 4200, visitors: 3300 },
-    { date: "Aug 25", views: 5600, visitors: 4400 },
-    { date: "Aug 30", views: 6800, visitors: 5120 },
-  ],
-  topPosts: [
-    { id: "post-3", title: "Designing Scalable Multi-Agent AI Architectures", views: 18450, likes: 1320, slug: "designing-scalable-multi-agent-ai-architectures" },
-    { id: "post-1", title: "Mastering Next.js Server Actions & Caching", views: 14280, likes: 842, slug: "mastering-nextjs-server-actions-and-caching" },
-    { id: "post-4", title: "Zero-Downtime PostgreSQL Schema Migrations", views: 11200, likes: 740, slug: "zero-downtime-postgresql-migrations-at-scale" },
-    { id: "post-2", title: "Building Resilient Design Systems", views: 9340, likes: 620, slug: "design-systems-at-scale-tokens-and-accessibility" },
-  ],
-  trafficSources: [
-    { name: "Direct / Organic Search", percentage: 48, color: "#6366f1" },
-    { name: "Social (Twitter / X, LinkedIn)", percentage: 28, color: "#8b5cf6" },
-    { name: "Tech News / Hacker News", percentage: 16, color: "#10b981" },
-    { name: "Referrals & RSS", percentage: 8, color: "#f59e0b" },
-  ],
-};

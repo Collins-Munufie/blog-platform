@@ -139,6 +139,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     tags,
     author,
     status: input.status,
+    language: input.language || 'en',
     publishedAt: new Date().toISOString(),
     readingTimeMinutes: calculateReadingTime(input.content),
     views: 0,

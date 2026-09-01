@@ -4,44 +4,41 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/ui/Toast";
 import "./globals.css";
 
-const plusJakarta = Plus_Jakarta_Sans({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-heading",
-  display: "swap",
   weight: ["400", "500", "600", "700", "800"],
 });
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-  display: "swap",
   weight: ["300", "400", "500", "600", "700"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-  display: "swap",
-  weight: ["400", "500"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "DevLog — Engineering & Architecture Publication",
-    template: "%s | DevLog",
+    default: "khophi_the_blogger — Tech, Culture & Pan-African Chronicles",
+    template: "%s | khophi_the_blogger",
   },
   description:
-    "An engineering-first publication covering modern web architectures, distributed systems, high-performance TypeScript, and AI systems.",
+    "Accra-based digital publication reporting on Silicon Accra tech innovation, mobile money economics, Afrobeats, and Ghanaian culture.",
   keywords: [
-    "Next.js",
-    "TypeScript",
-    "Software Architecture",
-    "PostgreSQL",
-    "Distributed Systems",
-    "React",
+    "Khophi",
+    "khophi_the_blogger",
+    "Ghana Tech",
+    "Accra Startups",
+    "Mobile Money Ghana",
+    "Afrobeats",
+    "Black Stars Football",
   ],
-  authors: [{ name: "DevLog Engineering Team" }],
-  creator: "DevLog",
+  authors: [{ name: "Khophi", url: "https://khophitheblogger.com" }],
 };
 
 export default function RootLayout({
@@ -50,16 +47,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${plusJakarta.variable} ${inter.variable} ${jetbrainsMono.variable}`}
-      suppressHydrationWarning
-    >
-      <body className="font-sans antialiased min-h-screen flex flex-col bg-[#f8fafc] dark:bg-[#090d16] text-slate-900 dark:text-slate-100 selection:bg-blue-500/20 selection:text-blue-700">
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable} font-sans bg-[#f7f9fc] dark:bg-[#041536] text-[#08214e] dark:text-slate-100 min-h-screen antialiased`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
-          enableSystem={false}
+          enableSystem
           disableTransitionOnChange
         >
           <ToastProvider>{children}</ToastProvider>

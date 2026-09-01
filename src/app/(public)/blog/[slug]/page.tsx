@@ -172,6 +172,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             {/* Interactive Reactions & Share Bar */}
             <InteractionBar
               postId={post.id}
+              title={post.title}
               initialLikes={post.likes}
               initialBookmarks={post.bookmarksCount}
               commentsCount={comments.length}
