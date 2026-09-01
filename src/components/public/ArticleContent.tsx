@@ -42,7 +42,6 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
 }
 
 export function ArticleContent({ content }: { content: string }) {
-  // Simple custom parser for markdown elements in the mock frontend
   const renderContent = () => {
     const lines = content.trim().split("\n");
     const elements: React.ReactNode[] = [];
@@ -77,6 +76,31 @@ export function ArticleContent({ content }: { content: string }) {
         continue;
       }
 
+      // Markdown Images ![alt](url)
+      const imgMatch = line.trim().match(/^!\[(.*?)\]\((.*?)\)$/);
+      if (imgMatch) {
+        const alt = imgMatch[1] || "Article image";
+        const src = imgMatch[2];
+        elements.push(
+          <figure key={`img-${i}`} className="my-8 space-y-2">
+            <div className="relative aspect-video max-h-[460px] w-full rounded-2xl overflow-hidden shadow-md border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+              <img
+                src={src}
+                alt={alt}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            {alt && alt !== "Article illustration" && (
+              <figcaption className="text-center text-xs text-stone-500 italic">
+                {alt}
+              </figcaption>
+            )}
+          </figure>
+        );
+        continue;
+      }
+
       // Headings
       if (line.startsWith("### ")) {
         const text = line.replace("### ", "").trim();
@@ -84,7 +108,7 @@ export function ArticleContent({ content }: { content: string }) {
           <h3
             key={`h3-${i}`}
             id={slugify(text)}
-            className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-8 mb-4 scroll-mt-24"
+            className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-8 mb-4 scroll-mt-24 font-heading"
           >
             {text}
           </h3>
@@ -98,7 +122,7 @@ export function ArticleContent({ content }: { content: string }) {
           <h2
             key={`h2-${i}`}
             id={slugify(text)}
-            className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-10 mb-4 scroll-mt-24"
+            className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-10 mb-4 scroll-mt-24 font-heading"
           >
             {text}
           </h2>
@@ -111,7 +135,7 @@ export function ArticleContent({ content }: { content: string }) {
         elements.push(
           <blockquote
             key={`quote-${i}`}
-            className="my-6 border-l-4 border-primary-500 bg-primary-50/50 p-4 rounded-r-xl text-slate-700 italic dark:bg-primary-950/20 dark:text-slate-300 text-sm leading-relaxed"
+            className="my-6 border-l-4 border-amber-500 bg-amber-50/50 p-4 rounded-r-xl text-stone-800 italic dark:bg-amber-950/20 dark:text-stone-200 text-sm leading-relaxed"
           >
             {line.replace("> ", "")}
           </blockquote>

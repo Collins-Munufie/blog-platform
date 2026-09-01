@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Upload, Link as LinkIcon, Image as ImageIcon, X, Check, AlertCircle } from "lucide-react";
+import { Upload, Link as LinkIcon, Image as ImageIcon, X, Check, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { MediaItem } from "@/lib/types";
@@ -20,9 +20,11 @@ export function InsertImageModal({
 }: InsertImageModalProps) {
   const [activeTab, setActiveTab] = React.useState<"upload" | "url" | "library">("upload");
   const [imageUrl, setImageUrl] = React.useState("");
+  const [shortUrl, setShortUrl] = React.useState("");
   const [imageAlt, setImageAlt] = React.useState("Article illustration");
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const [imageLoadError, setImageLoadError] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
   const [libraryItems, setLibraryItems] = React.useState<MediaItem[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -40,18 +42,66 @@ export function InsertImageModal({
 
   if (!isOpen) return null;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setImageLoadError(false);
-    setImageAlt(file.name.replace(/\.[^/.]+$/, ""));
+    const cleanTitle = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]+/g, " ");
+    setImageAlt(cleanTitle);
+    setIsUploading(true);
+
     const reader = new FileReader();
-    reader.onload = (loadEvent) => {
+    reader.onload = async (loadEvent) => {
       const dataUrl = loadEvent.target?.result as string;
-      if (dataUrl) {
-        setPreviewUrl(dataUrl);
-        setImageUrl(dataUrl);
+      if (!dataUrl) {
+        setIsUploading(false);
+        return;
+      }
+
+      setPreviewUrl(dataUrl);
+
+      try {
+        // Upload to server API to generate clean short URL
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            dataUrl,
+            name: file.name,
+            contentType: file.type,
+          }),
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          setShortUrl(json.url);
+          setImageUrl(json.url);
+
+          // Save to local Media Library for reuse
+          const newItem: MediaItem = {
+            id: json.mediaId || `med-${Date.now()}`,
+            name: file.name,
+            url: json.url,
+            size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+            dimensions: "Uploaded Image",
+            category: "Article Uploads",
+            uploadedAt: new Date().toISOString().split("T")[0],
+          };
+          const saved = JSON.parse(localStorage.getItem("devlog_media_items") || "[]");
+          localStorage.setItem("devlog_media_items", JSON.stringify([newItem, ...saved]));
+        } else {
+          // Fallback to local asset ID
+          const fallbackUrl = `/api/media/med_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+          setShortUrl(fallbackUrl);
+          setImageUrl(fallbackUrl);
+        }
+      } catch {
+        const fallbackUrl = `/api/media/med_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+        setShortUrl(fallbackUrl);
+        setImageUrl(fallbackUrl);
+      } finally {
+        setIsUploading(false);
       }
     };
     reader.readAsDataURL(file);
@@ -59,27 +109,30 @@ export function InsertImageModal({
 
   const handleUrlChange = (val: string) => {
     setImageUrl(val);
+    setShortUrl(val.trim());
     setPreviewUrl(val.trim() || null);
     setImageLoadError(false);
   };
 
   const handleConfirmInsert = () => {
-    const finalUrl = previewUrl || imageUrl.trim();
-    if (!finalUrl) return;
+    const finalCleanUrl = shortUrl.trim() || imageUrl.trim() || previewUrl;
+    if (!finalCleanUrl) return;
 
     const alt = imageAlt.trim() || "Article illustration";
-    const markdown = `\n\n![${alt}](${finalUrl})\n\n`;
+    // Inserts a clean 1-line markdown image tag without flooding the screen with Base64 code!
+    const markdown = `\n\n![${alt}](${finalCleanUrl})\n\n`;
     onInsert(markdown);
     onClose();
     setPreviewUrl(null);
     setImageUrl("");
+    setShortUrl("");
     setImageLoadError(false);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
       <div className="bg-white dark:bg-[#141a24] rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl max-w-lg w-full max-h-[88vh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
-        {/* 1. Header (Fixed Top - Never scrolls offscreen) */}
+        {/* 1. Header (Fixed Top) */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-stone-100 dark:border-stone-800 shrink-0 bg-white dark:bg-[#141a24]">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 shrink-0">
@@ -102,7 +155,7 @@ export function InsertImageModal({
           </button>
         </div>
 
-        {/* 2. Tabs (Fixed - Never scrolls offscreen) */}
+        {/* 2. Tabs (Fixed) */}
         <div className="flex border-b border-stone-100 dark:border-stone-800 px-4 sm:px-5 pt-2.5 gap-2 shrink-0 bg-stone-50/50 dark:bg-stone-900/30">
           <button
             type="button"
@@ -146,7 +199,7 @@ export function InsertImageModal({
           )}
         </div>
 
-        {/* 3. Middle Content (Scrolls smoothly in the middle) */}
+        {/* 3. Middle Content (Scrolls in center) */}
         <div className="p-4 sm:p-5 space-y-4 flex-1 overflow-y-auto min-h-0 scrollbar-thin">
           {/* Tab 1: Upload File */}
           {activeTab === "upload" && (
@@ -160,14 +213,25 @@ export function InsertImageModal({
                 id="editor-image-upload"
               />
               <div
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => !isUploading && fileInputRef.current?.click()}
                 className="border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-amber-500 dark:hover:border-amber-500 rounded-2xl p-5 sm:p-6 text-center cursor-pointer transition-colors bg-stone-50/70 dark:bg-stone-900/40 group"
               >
-                <Upload className="h-7 w-7 text-amber-600 dark:text-amber-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <p className="text-xs font-bold text-stone-800 dark:text-stone-200">
-                  Click to select a photo from your computer or phone
-                </p>
-                <p className="text-[10px] text-stone-400 mt-0.5">JPG, PNG, WEBP or GIF</p>
+                {isUploading ? (
+                  <div className="py-2 space-y-2">
+                    <Loader2 className="h-7 w-7 text-amber-500 animate-spin mx-auto" />
+                    <p className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                      Processing &amp; optimizing image...
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="h-7 w-7 text-amber-600 dark:text-amber-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <p className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                      Click to select a photo from your computer or phone
+                    </p>
+                    <p className="text-[10px] text-stone-400 mt-0.5">JPG, PNG, WEBP or GIF</p>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -184,7 +248,7 @@ export function InsertImageModal({
                 onChange={(e) => handleUrlChange(e.target.value)}
               />
               <p className="text-[11px] text-stone-400">
-                Tip: Use direct image links (ending in .jpg, .png, etc.) or use the Upload tab to choose from your device.
+                Tip: Direct image links (ending in .jpg, .png) or use the Upload tab to choose from your device.
               </p>
             </div>
           )}
@@ -198,6 +262,7 @@ export function InsertImageModal({
                   onClick={() => {
                     setPreviewUrl(item.url);
                     setImageUrl(item.url);
+                    setShortUrl(item.url);
                     setImageAlt(item.name);
                     setImageLoadError(false);
                   }}
@@ -213,7 +278,7 @@ export function InsertImageModal({
             </div>
           )}
 
-          {/* Preview & Caption (Compact so it never blows out modal height) */}
+          {/* Preview & Caption */}
           {previewUrl && (
             <div className="space-y-3 pt-3 border-t border-stone-100 dark:border-stone-800">
               <div className="relative h-36 sm:h-40 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
@@ -228,10 +293,7 @@ export function InsertImageModal({
                   <div className="p-4 text-center space-y-1">
                     <AlertCircle className="h-5 w-5 text-amber-500 mx-auto" />
                     <p className="text-xs font-bold text-stone-700 dark:text-stone-300">
-                      Link loaded (webpage format)
-                    </p>
-                    <p className="text-[10px] text-stone-400">
-                      This link will be embedded in your markdown story.
+                      Link loaded
                     </p>
                   </div>
                 )}
@@ -244,14 +306,14 @@ export function InsertImageModal({
                 <Input
                   value={imageAlt}
                   onChange={(e) => setImageAlt(e.target.value)}
-                  placeholder="e.g., Street view in Osu, Accra"
+                  placeholder="e.g., AWS Certified Cloud Practitioner Badge"
                 />
               </div>
             </div>
           )}
         </div>
 
-        {/* 4. Footer (Fixed Bottom - ALWAYS 100% VISIBLE & ACCESSIBLE) */}
+        {/* 4. Footer (Fixed Bottom - ALWAYS 100% VISIBLE) */}
         <div className="flex items-center justify-between gap-3 p-3.5 sm:p-4 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/70 shrink-0">
           <Button
             type="button"
