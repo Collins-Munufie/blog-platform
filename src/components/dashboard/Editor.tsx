@@ -298,71 +298,81 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
           {/* Markdown Quick Formatting Toolbar (Touch Scrollable on Mobile) */}
           <div className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-none">
             <button
+              type="button"
               onClick={() => insertMarkdown("## ", "\n", "Heading 2")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 text-xs font-bold shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 text-xs font-bold shrink-0 hover:text-amber-600"
               title="Heading 2"
             >
               <Heading2 className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => insertMarkdown("### ", "\n", "Heading 3")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 text-xs font-bold shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 text-xs font-bold shrink-0 hover:text-amber-600"
               title="Heading 3"
             >
               <Heading3 className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => insertMarkdown("**", "**", "bold text")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0 hover:text-amber-600"
               title="Bold"
             >
               <Bold className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => insertMarkdown("*", "*", "italic text")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0 hover:text-amber-600"
               title="Italic"
             >
               <Italic className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => insertMarkdown("\n```typescript\n", "\n```\n", "// code here")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0 hover:text-amber-600"
               title="Code block"
             >
               <Code className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => insertMarkdown("\n> ", "\n", "quote text")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0 hover:text-amber-600"
               title="Blockquote"
             >
               <Quote className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => insertMarkdown("\n* ", "\n", "List item")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0 hover:text-amber-600"
               title="Bulleted list"
             >
               <List className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => insertMarkdown("\n1. ", "\n", "List item")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0 hover:text-amber-600"
               title="Numbered list"
             >
               <ListOrdered className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => insertMarkdown("[", "](https://example.com)", "link text")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0 hover:text-amber-600"
               title="Link"
             >
               <LinkIcon className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => insertMarkdown("![alt text](", ")", "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80")}
-              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0"
+              className="p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 shrink-0 hover:text-amber-600"
               title="Image markdown"
             >
               <ImageIcon className="h-4 w-4" />

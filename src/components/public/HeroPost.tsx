@@ -12,14 +12,16 @@ import {
   BookOpen,
   MessageCircle,
   Layers,
-  MapPin,
 } from "lucide-react";
 import { Post } from "@/lib/types";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
+import { toggleLikePost } from "@/lib/api/posts";
 import { useToast } from "@/components/ui/Toast";
 
 export function HeroPost({ post }: { post: Post }) {
   const [isBookmarked, setIsBookmarked] = React.useState(false);
+  const [likes, setLikes] = React.useState(post.likes || 0);
+  const [isLiked, setIsLiked] = React.useState(false);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -28,11 +30,46 @@ export function HeroPost({ post }: { post: Post }) {
         localStorage.getItem("devlog_saved_bookmarks") || "[]"
       ) as string[];
       setIsBookmarked(saved.includes(post.id));
+
+      const likedList = JSON.parse(
+        localStorage.getItem("devlog_liked_posts") || "[]"
+      ) as string[];
+      setIsLiked(likedList.includes(post.id));
     } catch {}
   }, [post.id]);
 
+  const handleLikeToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const likedList = JSON.parse(
+        localStorage.getItem("devlog_liked_posts") || "[]"
+      ) as string[];
+
+      if (isLiked) {
+        const next = likedList.filter((id) => id !== post.id);
+        localStorage.setItem("devlog_liked_posts", JSON.stringify(next));
+        setIsLiked(false);
+        setLikes((prev) => Math.max(0, prev - 1));
+      } else {
+        const next = [...likedList, post.id];
+        localStorage.setItem("devlog_liked_posts", JSON.stringify(next));
+        setIsLiked(true);
+        setLikes((prev) => prev + 1);
+        toggleLikePost(post.id);
+        toast({
+          title: "Liked!",
+          description: `You liked "${post.title}".`,
+          type: "success",
+        });
+      }
+    } catch {}
+  };
+
   const handleBookmarkToggle = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     try {
       const saved = JSON.parse(
         localStorage.getItem("devlog_saved_bookmarks") || "[]"
@@ -58,6 +95,7 @@ export function HeroPost({ post }: { post: Post }) {
 
   const handleWhatsAppShare = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const url = typeof window !== "undefined" ? `${window.location.origin}/blog/${post.slug}` : "";
     const text = encodeURIComponent(`Read on khophi_the_blogger: "${post.title}"\n${url}`);
     window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
@@ -71,7 +109,7 @@ export function HeroPost({ post }: { post: Post }) {
           {/* Badges */}
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#f59e0b] text-[#0f172a] shadow-sm">
-              Featured Essay
+              Featured Story
             </span>
 
             {post.series && (
@@ -103,17 +141,28 @@ export function HeroPost({ post }: { post: Post }) {
             {post.excerpt}
           </p>
 
-          {/* Metadata chips */}
+          {/* Interactive metadata chips */}
           <div className="flex flex-wrap items-center gap-4 py-1 text-xs text-stone-300 font-medium">
             <div className="flex items-center gap-1.5">
               <Eye className="h-4 w-4 text-[#f59e0b]" />
-              <span className="font-bold text-white">{formatCompactNumber(post.views)}</span> Reads
+              <span className="font-bold text-white">{formatCompactNumber(post.views || 0)}</span> Reads
             </div>
-            <div className="flex items-center gap-1.5">
-              <Heart className="h-4 w-4 text-rose-400 fill-rose-400" />
-              <span className="font-bold text-white">{formatCompactNumber(post.likes)}</span> Likes
-            </div>
-            <span className="text-amber-300 font-semibold font-mono">📍 Osu, Accra</span>
+
+            {/* Clickable Like Button on Hero Card */}
+            <button
+              onClick={handleLikeToggle}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all ${
+                isLiked
+                  ? "bg-rose-500/20 text-rose-300 border border-rose-400/40 scale-105"
+                  : "bg-white/10 text-stone-300 hover:bg-white/20 hover:text-white"
+              }`}
+              title={isLiked ? "Unlike story" : "Like story"}
+            >
+              <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-rose-400 text-rose-400" : ""}`} />
+              <span>{formatCompactNumber(likes)}</span>
+            </button>
+
+            <span className="text-amber-300 font-semibold font-mono">📍 Accra, Ghana</span>
           </div>
 
           {/* Action Row */}
@@ -123,7 +172,7 @@ export function HeroPost({ post }: { post: Post }) {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-stone-900 hover:bg-stone-100 text-xs font-bold shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               <BookOpen className="h-4 w-4 text-stone-900" />
-              <span>Read Essay</span>
+              <span>Read Story</span>
               <ArrowRight className="h-4 w-4 text-stone-900" />
             </Link>
 
@@ -168,16 +217,16 @@ export function HeroPost({ post }: { post: Post }) {
 
           {/* Author Badge */}
           <Link
-            href={`/author/${post.author.id}`}
+            href={`/about`}
             className="absolute -bottom-3 left-4 right-4 bg-stone-900/90 backdrop-blur-md p-3 rounded-xl flex items-center justify-between gap-3 text-xs border border-stone-700 hover:bg-stone-800 transition-all shadow-lg"
           >
             <div className="flex items-center gap-2.5">
               <Image
-                src={post.author.avatar}
+                src={post.author.avatar || "/khophi_profile.jpg"}
                 alt={post.author.name}
                 width={32}
                 height={32}
-                className="rounded-full object-cover ring-1 ring-[#f59e0b]"
+                className="rounded-full object-cover ring-1 ring-[#f59e0b] h-8 w-8"
               />
               <div>
                 <p className="font-bold text-white leading-tight">{post.author.name}</p>

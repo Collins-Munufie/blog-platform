@@ -139,8 +139,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
-              pathname === item.href ||
-              (item.href !== "/admin" && pathname.startsWith(item.href));
+              item.href === "/admin"
+                ? pathname === "/admin"
+                : pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href + "/"));
 
             return (
               <Link

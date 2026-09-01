@@ -8,13 +8,9 @@ import {
   Menu,
   X,
   Bookmark,
-  Sparkles,
-  Archive,
-  Layers,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { SearchDialog } from "./SearchDialog";
-import { LanguageSwitcher, LocalizedGreetingBanner } from "./LanguageSwitcher";
 
 export function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
@@ -42,14 +38,11 @@ export function Navbar() {
 
   return (
     <>
-      {/* Localized Greeting Alert Banner */}
-      <LocalizedGreetingBanner />
-
       <header className="sticky top-0 z-40 w-full border-b border-[#e2e8f2] dark:border-[#1e3a6a] glass-nav transition-colors">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
           {/* Logo / Brand (khophi_the_blogger) */}
           <div className="flex items-center gap-4 lg:gap-8 min-w-0">
-            <Link href="/" className="flex items-center gap-2 group shrink-0">
+            <Link href="/" className="flex items-center gap-2.5 group shrink-0">
               <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-[#08214e] dark:bg-[#12346e] text-white shadow-md border border-amber-400/40 group-hover:scale-105 transition-transform">
                 <span className="font-mono font-black text-xs sm:text-sm tracking-tight text-[#f59e0b]">
                   _k
@@ -91,7 +84,7 @@ export function Navbar() {
             </nav>
           </div>
 
-          {/* Right Action Bar (Public Only: Search, Language, Theme, Mobile Menu) */}
+          {/* Right Action Bar (Search, Theme, Mobile Menu - NO Language button) */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Search Trigger */}
             <button
@@ -105,9 +98,6 @@ export function Navbar() {
                 ⌘K
               </kbd>
             </button>
-
-            {/* Multilingual Switcher */}
-            <LanguageSwitcher />
 
             {/* Theme Toggle */}
             <ThemeToggle />

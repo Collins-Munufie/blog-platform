@@ -79,8 +79,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {links.map((item) => {
             const Icon = item.icon;
             const isActive =
-              pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : item.href === "/dashboard/posts"
+                ? pathname === "/dashboard/posts"
+                : pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
 
             return (
               <Link

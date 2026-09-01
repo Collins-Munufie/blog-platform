@@ -5,6 +5,9 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { PostDataTable } from "@/components/dashboard/PostDataTable";
 import { Button } from "@/components/ui/Button";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function DashboardPostsPage() {
   const posts = await getPosts({ status: "all" });
 

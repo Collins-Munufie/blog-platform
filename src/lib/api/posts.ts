@@ -4,32 +4,39 @@ import { calculateReadingTime, slugify } from "../utils";
 
 const STORAGE_KEY = "devlog_posts_store";
 
-function getStoredPosts(): Post[] {
+// Use globalThis to persist in-memory across Server Component requests in Node.js runtime
+declare global {
+  var __GLOBAL_POSTS__: Post[] | undefined;
+}
+
+function getGlobalPosts(): Post[] {
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         return JSON.parse(stored);
       }
-    } catch {
-      // Ignore JSON error
-    }
+    } catch {}
+    return [...MOCK_POSTS];
   }
-  return [...MOCK_POSTS];
+
+  if (!globalThis.__GLOBAL_POSTS__) {
+    globalThis.__GLOBAL_POSTS__ = [...MOCK_POSTS];
+  }
+  return globalThis.__GLOBAL_POSTS__;
 }
 
-function saveStoredPosts(posts: Post[]) {
+function saveGlobalPosts(posts: Post[]) {
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-    } catch {
-      // Ignore
-    }
+      // Notify other components on client
+      window.dispatchEvent(new Event("posts_updated"));
+    } catch {}
+  } else {
+    globalThis.__GLOBAL_POSTS__ = posts;
   }
 }
-
-// In-memory runtime state (seeded with mock posts)
-let postsState: Post[] = [...MOCK_POSTS];
 
 export interface GetPostsParams {
   categorySlug?: string;
@@ -41,19 +48,13 @@ export interface GetPostsParams {
 }
 
 export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
-  await new Promise((resolve) => setTimeout(resolve, 20));
-
-  // If in browser, sync from localStorage if present
-  if (typeof window !== "undefined") {
-    postsState = getStoredPosts();
-  }
-
-  let result = [...postsState];
+  const posts = getGlobalPosts();
+  let result = [...posts];
 
   if (params.status && params.status !== "all") {
     result = result.filter((p) => p.status === params.status);
   } else if (!params.status) {
-    // Default to published only for reader facing queries
+    // Default to published only for public reader queries
     result = result.filter((p) => p.status === "published");
   }
 
@@ -79,7 +80,7 @@ export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
     );
   }
 
-  // Sort descending by publishedAt
+  // Sort descending by publishedAt / createdAt
   result.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
   if (params.limit) {
@@ -90,37 +91,24 @@ export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  await new Promise((resolve) => setTimeout(resolve, 20));
-  if (typeof window !== "undefined") {
-    postsState = getStoredPosts();
-  }
-  const post = postsState.find((p) => p.slug === slug);
+  const posts = getGlobalPosts();
+  const post = posts.find((p) => p.slug === slug);
   return post ? { ...post } : null;
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
-  await new Promise((resolve) => setTimeout(resolve, 20));
-  if (typeof window !== "undefined") {
-    postsState = getStoredPosts();
-  }
-  const post = postsState.find((p) => p.id === id);
+  const posts = getGlobalPosts();
+  const post = posts.find((p) => p.id === id);
   return post ? { ...post } : null;
 }
 
 export async function getFeaturedPosts(): Promise<Post[]> {
-  await new Promise((resolve) => setTimeout(resolve, 20));
-  if (typeof window !== "undefined") {
-    postsState = getStoredPosts();
-  }
-  return postsState.filter((p) => p.featured && p.status === "published");
+  const posts = getGlobalPosts();
+  return posts.filter((p) => p.featured && p.status === "published");
 }
 
 export async function createPost(input: CreatePostInput): Promise<Post> {
-  await new Promise((resolve) => setTimeout(resolve, 60));
-
-  if (typeof window !== "undefined") {
-    postsState = getStoredPosts();
-  }
+  const posts = getGlobalPosts();
 
   const category = MOCK_CATEGORIES.find((c) => c.id === input.categoryId) || MOCK_CATEGORIES[0];
   const tags = MOCK_TAGS.filter((t) => input.tagIds?.includes(t.id));
@@ -134,7 +122,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     content: input.content,
     coverImage:
       input.coverImage ||
-      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80",
     category,
     tags,
     author,
@@ -149,56 +137,76 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     seo: input.seo,
   };
 
-  postsState.unshift(newPost);
-  saveStoredPosts(postsState);
+  const updated = [newPost, ...posts];
+  saveGlobalPosts(updated);
+
+  // If in browser, also sync with API endpoint in background
+  if (typeof window !== "undefined") {
+    try {
+      fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPost),
+      }).catch(() => {});
+    } catch {}
+  }
+
   return newPost;
 }
 
 export async function updatePost(id: string, updates: Partial<Post>): Promise<Post> {
-  await new Promise((resolve) => setTimeout(resolve, 60));
-
-  if (typeof window !== "undefined") {
-    postsState = getStoredPosts();
-  }
-
-  const index = postsState.findIndex((p) => p.id === id);
+  const posts = getGlobalPosts();
+  const index = posts.findIndex((p) => p.id === id);
   if (index === -1) {
     throw new Error(`Post not found with ID ${id}`);
   }
 
-  const updated: Post = {
-    ...postsState[index],
+  const updatedPost: Post = {
+    ...posts[index],
     ...updates,
     updatedAt: new Date().toISOString(),
     readingTimeMinutes: updates.content
       ? calculateReadingTime(updates.content)
-      : postsState[index].readingTimeMinutes,
+      : posts[index].readingTimeMinutes,
   };
 
-  postsState[index] = updated;
-  saveStoredPosts(postsState);
-  return updated;
+  posts[index] = updatedPost;
+  saveGlobalPosts(posts);
+
+  if (typeof window !== "undefined") {
+    try {
+      fetch(`/api/posts/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedPost),
+      }).catch(() => {});
+    } catch {}
+  }
+
+  return updatedPost;
 }
 
 export async function deletePost(id: string): Promise<boolean> {
-  await new Promise((resolve) => setTimeout(resolve, 60));
+  const posts = getGlobalPosts();
+  const initialLength = posts.length;
+  const filtered = posts.filter((p) => p.id !== id);
+  saveGlobalPosts(filtered);
+
   if (typeof window !== "undefined") {
-    postsState = getStoredPosts();
+    try {
+      fetch(`/api/posts/${id}`, { method: "DELETE" }).catch(() => {});
+    } catch {}
   }
-  const initialLength = postsState.length;
-  postsState = postsState.filter((p) => p.id !== id);
-  saveStoredPosts(postsState);
-  return postsState.length < initialLength;
+
+  return filtered.length < initialLength;
 }
 
 export async function toggleLikePost(id: string): Promise<number> {
-  if (typeof window !== "undefined") {
-    postsState = getStoredPosts();
-  }
-  const post = postsState.find((p) => p.id === id);
+  const posts = getGlobalPosts();
+  const post = posts.find((p) => p.id === id);
   if (post) {
-    post.likes += 1;
-    saveStoredPosts(postsState);
+    post.likes = (post.likes || 0) + 1;
+    saveGlobalPosts(posts);
     return post.likes;
   }
   return 0;
