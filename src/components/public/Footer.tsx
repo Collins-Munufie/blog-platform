@@ -21,20 +21,20 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-3 text-slate-400">
               <a
-                href="https://twitter.com/khophi_blogger"
+                href="https://x.com/cmunufie17588?s=11"
                 target="_blank"
                 rel="noreferrer"
                 className="p-1.5 rounded-lg hover:bg-[#eef3fa] hover:text-[#08214e] dark:hover:bg-[#12346e] dark:hover:text-white transition-colors"
-                title="Twitter / X"
+                title="Twitter / X (@cmunufie17588)"
               >
                 <Twitter className="h-4 w-4" />
               </a>
               <a
-                href="https://wa.me/233240000000"
+                href="https://wa.me/233559689849"
                 target="_blank"
                 rel="noreferrer"
                 className="p-1.5 rounded-lg hover:bg-emerald-50 hover:text-[#25D366] dark:hover:bg-[#12346e] transition-colors"
-                title="WhatsApp Channel"
+                title="WhatsApp (0559689849)"
               >
                 <MessageCircle className="h-4 w-4" />
               </a>
@@ -121,15 +121,15 @@ export function Footer() {
               Community &amp; WhatsApp
             </h4>
             <p className="text-xs text-[#93a0b4] leading-relaxed">
-              Join 12,000+ readers receiving our WhatsApp bulletin for breaking Accra tech drops and cultural investigations.
+              Join 12,000+ readers receiving our WhatsApp bulletin (0559689849) for breaking tech drops and investigations.
             </p>
             <a
-              href="https://wa.me/233240000000"
+              href="https://wa.me/233559689849"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#25D366]/15 text-[#128C7E] dark:text-[#25D366] text-xs font-bold border border-[#25D366]/30 hover:bg-[#25D366]/25 transition-colors"
             >
-              <MessageCircle className="h-3.5 w-3.5 fill-current" /> Join WhatsApp Channel
+              <MessageCircle className="h-3.5 w-3.5 fill-current" /> WhatsApp: 0559689849
             </a>
           </div>
         </div>

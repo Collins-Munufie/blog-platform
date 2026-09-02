@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/public/ThemeToggle";
+import { logoutAdmin } from "@/lib/api/auth";
 
 export function DashboardSidebar() {
   const pathname = usePathname();
@@ -22,7 +23,7 @@ export function DashboardSidebar() {
     { label: "Articles & Drafts", href: "/dashboard/posts", icon: FileText },
     { label: "Write Story", href: "/dashboard/posts/new", icon: PenSquare },
     { label: "Audience Growth", href: "/dashboard/analytics", icon: BarChart3 },
-    { label: "Admin Console", href: "/admin", icon: Sparkles },
+    { label: "Admin Console", href: "/admin", icon: Globe },
   ];
 
   return (
@@ -83,14 +84,21 @@ export function DashboardSidebar() {
         </Link>
 
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#f7f9fc] dark:bg-[#041536]/80 border border-[#e2e8f2] dark:border-[#1e3a6a]">
-          <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-[#f59e0b] to-[#fbbf24] flex items-center justify-center text-[#041536] text-[11px] font-black">
+          <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-[#f59e0b] to-[#fbbf24] flex items-center justify-center text-[#041536] text-[11px] font-black shrink-0">
             K
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-[#08214e] dark:text-white truncate">
-              Khophi
+            <p className="text-xs font-bold text-[#08214e] dark:text-white truncate flex items-center gap-1">
+              <span>Khophi</span>
+              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold">🔒 Active</span>
             </p>
-            <p className="text-[10px] text-[#93a0b4] truncate">Lead Editor &amp; Creator</p>
+            <button
+              type="button"
+              onClick={() => logoutAdmin()}
+              className="text-[10px] text-rose-500 hover:underline font-bold"
+            >
+              Lock Studio
+            </button>
           </div>
         </div>
       </div>

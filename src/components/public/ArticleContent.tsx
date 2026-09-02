@@ -41,7 +41,7 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
   );
 }
 
-export function ArticleContent({ content }: { content: string }) {
+export function ArticleContent({ content, coverImage }: { content: string; coverImage?: string }) {
   const renderContent = () => {
     const lines = content.trim().split("\n");
     const elements: React.ReactNode[] = [];
@@ -81,6 +81,12 @@ export function ArticleContent({ content }: { content: string }) {
       if (imgMatch) {
         const alt = imgMatch[1] || "Article image";
         const src = imgMatch[2];
+
+        // Skip rendering if this image is identical to the top hero cover image
+        if (coverImage && (src === coverImage || (coverImage.includes(src) && src.length > 20))) {
+          continue;
+        }
+
         elements.push(
           <figure key={`img-${i}`} className="my-8 space-y-2">
             <div className="relative aspect-video max-h-[460px] w-full rounded-2xl overflow-hidden shadow-md border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
@@ -89,6 +95,9 @@ export function ArticleContent({ content }: { content: string }) {
                 alt={alt}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.opacity = "0.5";
+                }}
               />
             </div>
             {alt && alt !== "Article illustration" && (

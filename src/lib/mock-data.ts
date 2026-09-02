@@ -48,10 +48,10 @@ export const MOCK_AUTHORS: Author[] = [
     bio: 'Hey! I’m Khophi. I write essays on building software, mobile money infrastructure, Afrobeats culture, and daily life in Accra, Ghana.',
     role: 'Engineer, Writer & Creator',
     location: 'Accra, Ghana 🇬🇭',
-    twitter: 'https://twitter.com/khophi_blogger',
+    twitter: 'https://x.com/cmunufie17588?s=11',
     github: 'https://github.com/khophi',
     website: 'https://khophitheblogger.com',
-    whatsapp: 'https://wa.me/233240000000',
+    whatsapp: 'https://wa.me/233559689849',
   },
   {
     id: 'auth-kwame',

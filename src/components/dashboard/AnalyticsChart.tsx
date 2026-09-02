@@ -7,7 +7,6 @@ import {
   FileText,
   Clock,
   TrendingUp,
-  Sparkles,
   Users,
   Compass,
   ArrowUpRight,
@@ -19,47 +18,65 @@ import {
 import { ExtendedAnalyticsSummary } from "@/lib/api/analytics";
 import { formatCompactNumber } from "@/lib/utils";
 
-export function AnalyticsChart({ data }: { data: ExtendedAnalyticsSummary }) {
+export function AnalyticsChart({ data: initialData }: { data: ExtendedAnalyticsSummary }) {
+  const [data, setData] = React.useState<ExtendedAnalyticsSummary>(initialData);
   const [timeRange, setTimeRange] = React.useState<"7d" | "30d" | "all">("30d");
   const [hoveredIdx, setHoveredIdx] = React.useState<number | null>(null);
 
-  // Growth Trend Data based on selected time range
+  React.useEffect(() => {
+    setData(initialData);
+
+    const handleSync = () => {
+      // Dynamic refresh on event
+      try {
+        const stored = localStorage.getItem("devlog_posts_store");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const views = parsed.reduce((acc: number, p: any) => acc + (p.views || 0), 0);
+          const likes = parsed.reduce((acc: number, p: any) => acc + (p.likes || 0), 0);
+          setData((prev) => ({
+            ...prev,
+            totalViews: Math.max(prev.totalViews, views),
+            totalLikes: Math.max(prev.totalLikes, likes),
+          }));
+        }
+      } catch {}
+    };
+
+    window.addEventListener("views_updated", handleSync);
+    window.addEventListener("likes_updated", handleSync);
+    window.addEventListener("posts_updated", handleSync);
+
+    return () => {
+      window.removeEventListener("views_updated", handleSync);
+      window.removeEventListener("likes_updated", handleSync);
+      window.removeEventListener("posts_updated", handleSync);
+    };
+  }, [initialData]);
+
+  // Growth Trend Data based on real post views
   const trendData = React.useMemo(() => {
-    if (timeRange === "7d") {
-      return [
-        { label: "Mon", views: Math.round(data.totalViews * 0.08), readers: Math.round(data.totalViews * 0.06) },
-        { label: "Tue", views: Math.round(data.totalViews * 0.12), readers: Math.round(data.totalViews * 0.09) },
-        { label: "Wed", views: Math.round(data.totalViews * 0.18), readers: Math.round(data.totalViews * 0.14) },
-        { label: "Thu", views: Math.round(data.totalViews * 0.15), readers: Math.round(data.totalViews * 0.11) },
-        { label: "Fri", views: Math.round(data.totalViews * 0.22), readers: Math.round(data.totalViews * 0.17) },
-        { label: "Sat", views: Math.round(data.totalViews * 0.11), readers: Math.round(data.totalViews * 0.08) },
-        { label: "Sun", views: Math.round(data.totalViews * 0.14), readers: Math.round(data.totalViews * 0.10) },
-      ];
-    } else if (timeRange === "30d") {
-      return [
-        { label: "Week 1", views: Math.round(data.totalViews * 0.18), readers: Math.round(data.totalViews * 0.14) },
-        { label: "Week 2", views: Math.round(data.totalViews * 0.24), readers: Math.round(data.totalViews * 0.19) },
-        { label: "Week 3", views: Math.round(data.totalViews * 0.27), readers: Math.round(data.totalViews * 0.21) },
-        { label: "Week 4", views: Math.round(data.totalViews * 0.31), readers: Math.round(data.totalViews * 0.26) },
-      ];
+    if (data.topPosts && data.topPosts.length > 0) {
+      return data.topPosts.map((p) => ({
+        label: p.title.length > 12 ? p.title.slice(0, 10) + "..." : p.title,
+        views: p.views || 0,
+        readers: p.likes || 0,
+      }));
     }
     return [
-      { label: "May", views: Math.round(data.totalViews * 0.15), readers: Math.round(data.totalViews * 0.11) },
-      { label: "Jun", views: Math.round(data.totalViews * 0.22), readers: Math.round(data.totalViews * 0.17) },
-      { label: "Jul", views: Math.round(data.totalViews * 0.28), readers: Math.round(data.totalViews * 0.22) },
-      { label: "Aug", views: Math.round(data.totalViews * 0.35), readers: Math.round(data.totalViews * 0.29) },
+      { label: "Story Readership", views: data.totalViews, readers: data.totalLikes },
     ];
-  }, [timeRange, data.totalViews]);
+  }, [data.topPosts, data.totalViews, data.totalLikes]);
 
   const maxViews = Math.max(...trendData.map((d) => d.views), 1);
 
-  // Geographic Readership Demographics
+  // Geographic Readership Demographics (Clean Country Display)
   const geoDemographics = [
-    { city: "Accra & Tema", country: "Ghana 🇬🇭", share: 48, color: "bg-amber-500" },
-    { city: "Lagos & Abuja", country: "Nigeria 🇳🇬", share: 24, color: "bg-emerald-500" },
-    { city: "London & UK Diaspora", country: "United Kingdom 🇬🇧", share: 14, color: "bg-blue-500" },
-    { city: "Nairobi", country: "Kenya 🇰🇪", share: 8, color: "bg-purple-500" },
-    { city: "New York & Global", country: "Worldwide 🌍", share: 6, color: "bg-stone-400" },
+    { country: "Ghana 🇬🇭", share: 48, color: "bg-amber-500" },
+    { country: "Nigeria 🇳🇬", share: 24, color: "bg-emerald-500" },
+    { country: "United Kingdom 🇬🇧", share: 14, color: "bg-blue-500" },
+    { country: "Kenya 🇰🇪", share: 8, color: "bg-purple-500" },
+    { country: "Worldwide 🌍", share: 6, color: "bg-stone-400" },
   ];
 
   return (
@@ -70,7 +87,7 @@ export function AnalyticsChart({ data }: { data: ExtendedAnalyticsSummary }) {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-bold backdrop-blur-md border border-amber-400/30">
-              <Sparkles className="h-3.5 w-3.5" />
+              <TrendingUp className="h-3.5 w-3.5 text-amber-300" />
               <span>Audience Growth Engine</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black font-heading tracking-tight text-white">
@@ -314,9 +331,8 @@ export function AnalyticsChart({ data }: { data: ExtendedAnalyticsSummary }) {
             {geoDemographics.map((geo, idx) => (
               <div key={idx} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                    <span>{geo.country}</span>
-                    <span className="font-normal text-stone-400 text-[11px]">({geo.city})</span>
+                  <span className="font-bold text-stone-800 dark:text-stone-200">
+                    {geo.country}
                   </span>
                   <span className="font-mono font-bold text-stone-700 dark:text-stone-300">
                     {geo.share}%

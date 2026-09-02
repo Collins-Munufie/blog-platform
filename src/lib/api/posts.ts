@@ -205,14 +205,17 @@ export async function updatePost(id: string, updates: Partial<Post>): Promise<Po
   return updatedPost;
 }
 
-export async function deletePost(id: string): Promise<boolean> {
+export async function deletePost(idOrSlug: string): Promise<boolean> {
   const posts = getStoredPosts();
   const initialLength = posts.length;
-  const filtered = posts.filter((p) => p.id !== id);
+  const target = posts.find((p) => p.id === idOrSlug || p.slug === idOrSlug);
+  const targetId = target ? target.id : idOrSlug;
+
+  const filtered = posts.filter((p) => p.id !== idOrSlug && p.slug !== idOrSlug);
   saveStoredPosts(filtered);
 
   if (typeof window !== "undefined") {
-    fetch(`/api/posts/${id}`, { method: "DELETE" }).catch(() => {});
+    fetch(`/api/posts/${targetId}`, { method: "DELETE" }).catch(() => {});
   }
 
   return filtered.length < initialLength;

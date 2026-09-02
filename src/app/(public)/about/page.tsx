@@ -37,21 +37,21 @@ export default function AboutPage() {
             </p>
             <div className="flex items-center gap-3 text-xs text-stone-500 pt-1">
               <a
-                href="https://twitter.com/khophi_blogger"
+                href="https://x.com/cmunufie17588?s=11"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-stone-900 dark:hover:text-white flex items-center gap-1 font-semibold"
               >
-                <Twitter className="h-3.5 w-3.5 text-sky-500" /> @khophi_blogger
+                <Twitter className="h-3.5 w-3.5 text-sky-500" /> @cmunufie17588
               </a>
               <span>•</span>
               <a
-                href="https://wa.me/233240000000"
+                href="https://wa.me/233559689849"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-stone-900 dark:hover:text-white flex items-center gap-1 text-[#25D366] font-semibold"
               >
-                <MessageCircle className="h-3.5 w-3.5 fill-current" /> WhatsApp
+                <MessageCircle className="h-3.5 w-3.5 fill-current" /> WhatsApp: 0559689849
               </a>
             </div>
           </div>
@@ -123,13 +123,13 @@ export default function AboutPage() {
         </p>
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <a
-            href="https://wa.me/233240000000"
+            href="https://wa.me/233559689849"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] text-stone-950 font-bold text-xs shadow-sm hover:bg-[#20bd5a] transition-colors"
           >
             <MessageCircle className="h-4 w-4 fill-stone-950" />
-            <span>Chat on WhatsApp</span>
+            <span>WhatsApp (0559689849)</span>
           </a>
           <a
             href="mailto:khophi@khophitheblogger.com"

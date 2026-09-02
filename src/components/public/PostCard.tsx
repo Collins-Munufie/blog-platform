@@ -147,21 +147,16 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
       <article className="group card-simple p-4 sm:p-5 flex flex-col sm:flex-row gap-5 rounded-2xl relative">
         <Link
           href={`/blog/${post.slug}`}
-          className="relative aspect-[16/10] sm:aspect-square sm:w-44 rounded-xl overflow-hidden shrink-0 bg-stone-900/90 flex items-center justify-center p-1.5"
+          className="relative aspect-[16/10] sm:aspect-square sm:w-44 rounded-xl overflow-hidden shrink-0 bg-stone-900"
         >
-          {/* Subtle Ambient blur */}
-          <div className="absolute inset-0 overflow-hidden opacity-20 blur-md scale-110 pointer-events-none">
-            <Image src={post.coverImage} alt="" fill className="object-cover" />
-          </div>
-          <div className="relative h-full w-full">
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              sizes="(max-width: 640px) 100vw, 180px"
-              className="object-contain transition-transform duration-500 group-hover:scale-105"
-            />
-          </div>
+          <img
+            src={post.coverImage}
+            alt={post.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.opacity = "0.5";
+            }}
+          />
         </Link>
 
         <div className="flex-1 flex flex-col justify-between space-y-3">
@@ -247,26 +242,16 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
         {/* Cover Image Container (Ambient Blur + Crisp Contain) */}
         <Link
           href={`/blog/${post.slug}`}
-          className="relative aspect-[16/10] overflow-hidden block bg-stone-950/90 p-2 border-b border-stone-100 dark:border-stone-800"
+          className="relative aspect-[16/10] overflow-hidden block bg-stone-900 border-b border-stone-100 dark:border-stone-800"
         >
-          {/* Ambient subtle blur */}
-          <div className="absolute inset-0 overflow-hidden opacity-25 blur-md scale-110 pointer-events-none">
-            <Image
-              src={post.coverImage}
-              alt=""
-              fill
-              className="object-cover"
-            />
-          </div>
-          <div className="relative h-full w-full">
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-contain transition-transform duration-500 group-hover:scale-105"
-            />
-          </div>
+          <img
+            src={post.coverImage}
+            alt={post.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.opacity = "0.5";
+            }}
+          />
 
           <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
             <span className="editorial-tag text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm bg-white/95 dark:bg-stone-900/95">

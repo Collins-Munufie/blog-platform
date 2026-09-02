@@ -115,11 +115,10 @@ export function InsertImageModal({
   };
 
   const handleConfirmInsert = () => {
-    const finalCleanUrl = shortUrl.trim() || imageUrl.trim() || previewUrl;
+    const finalCleanUrl = (imageUrl.trim() || shortUrl.trim() || previewUrl || "").trim();
     if (!finalCleanUrl) return;
 
     const alt = imageAlt.trim() || "Article illustration";
-    // Inserts a clean 1-line markdown image tag without flooding the screen with Base64 code!
     const markdown = `\n\n![${alt}](${finalCleanUrl})\n\n`;
     onInsert(markdown);
     onClose();

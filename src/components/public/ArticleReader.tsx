@@ -147,28 +147,6 @@ export function ArticleReader({
               </span>
             </Link>
 
-            <Link href={`/dashboard/posts/${post.id}/edit`}>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs gap-1.5 rounded-xl border-stone-200 dark:border-stone-700"
-                title="Edit this article in Studio"
-              >
-                <Edit className="h-3.5 w-3.5 text-blue-500" />
-                <span className="hidden sm:inline">Edit</span>
-              </Button>
-            </Link>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDeleteModalOpen(true)}
-              className="h-8 text-xs gap-1.5 rounded-xl border-rose-200 dark:border-rose-900/60 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-              title="Permanently delete this published article"
-            >
-              <Trash2 className="h-3.5 w-3.5 text-rose-500" />
-              <span>Delete</span>
-            </Button>
           </div>
         </div>
 
@@ -224,22 +202,17 @@ export function ArticleReader({
           </div>
         </header>
 
-        {/* Hero Cover Image (Crisp unclipped container with ambient blur) */}
+        {/* Hero Cover Image */}
         {post.coverImage && (
-          <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden rounded-3xl mb-12 shadow-xl border border-stone-200 dark:border-stone-800 bg-stone-950/90 p-3 flex items-center justify-center">
-            <div className="absolute inset-0 overflow-hidden opacity-25 blur-xl scale-110 pointer-events-none">
-              <Image src={post.coverImage} alt="" fill className="object-cover" />
-            </div>
-            <div className="relative h-full w-full">
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                fill
-                priority
-                sizes="(max-width: 1280px) 100vw, 1200px"
-                className="object-contain"
-              />
-            </div>
+          <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden rounded-3xl mb-12 shadow-xl border border-stone-200 dark:border-stone-800 bg-stone-900">
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.opacity = "0.5";
+              }}
+            />
           </div>
         )}
 
@@ -248,7 +221,7 @@ export function ArticleReader({
           {/* Main Content Column */}
           <div className="lg:col-span-8 space-y-8">
             {/* Article Body */}
-            <ArticleContent content={post.content} />
+            <ArticleContent content={post.content} coverImage={post.coverImage} />
 
             {/* Tags */}
             {post.tags && post.tags.length > 0 && (

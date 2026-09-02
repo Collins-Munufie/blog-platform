@@ -14,12 +14,12 @@ import {
   Globe,
   Settings,
   ArrowRight,
-  Sparkles,
   LayoutDashboard,
   Image as ImageIcon,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/public/ThemeToggle";
 import { getAdminKPIs } from "@/lib/api/admin";
+import { logoutAdmin } from "@/lib/api/auth";
 import { AdminKPISummary } from "@/lib/types";
 
 export function AdminSidebar() {
@@ -156,12 +156,21 @@ export function AdminSidebar() {
         </Link>
 
         <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[#041536] border border-[#12346e]">
-          <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-[#f59e0b] to-[#fbbf24] flex items-center justify-center text-[#041536] text-[11px] font-black">
+          <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-[#f59e0b] to-[#fbbf24] flex items-center justify-center text-[#041536] text-[11px] font-black shrink-0">
             K
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-white truncate">Khophi</p>
-            <p className="text-[10px] text-[#8ab1e3] font-mono truncate">Founder &amp; SuperAdmin</p>
+            <p className="text-xs font-bold text-white truncate flex items-center gap-1">
+              <span>Khophi</span>
+              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-bold">🔒 Admin</span>
+            </p>
+            <button
+              type="button"
+              onClick={() => logoutAdmin()}
+              className="text-[10px] text-rose-400 hover:underline font-bold"
+            >
+              Lock Admin Console
+            </button>
           </div>
         </div>
       </div>

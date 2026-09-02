@@ -56,8 +56,7 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
   );
   const [excerpt, setExcerpt] = React.useState(initialPost?.excerpt || "");
   const [coverImage, setCoverImage] = React.useState(
-    initialPost?.coverImage ||
-      "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80"
+    initialPost?.coverImage || ""
   );
   const [status, setStatus] = React.useState<PostStatus>(
     initialPost?.status || "published"
@@ -150,12 +149,8 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
     const match = markdownImage.match(/!\[.*?\]\((.*?)\)/);
     if (match && match[1]) {
       const extractedUrl = match[1];
-      // Automatically set as article cover photo if cover is still the default stock photo
-      if (
-        !coverImage ||
-        coverImage.includes("photo-1531482615713-2afd69097998") ||
-        coverImage.includes("photo-1526374965328-7f61d4dc18c5")
-      ) {
+      // Automatically set as article cover photo if cover is currently empty
+      if (!coverImage) {
         setCoverImage(extractedUrl);
       }
     }
@@ -299,7 +294,7 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Mode Switcher: Natural Write vs Live Preview */}
           <div className="flex items-center gap-1 p-1 bg-stone-100 dark:bg-stone-800 rounded-2xl mr-2">
             <button
@@ -464,27 +459,48 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
                   <ImageIcon className="h-3.5 w-3.5 text-amber-600" />
                   <span>Story Cover Photo (Displays on Homepage &amp; Cards)</span>
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsCoverModalOpen(true)}
-                  className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
-                >
-                  <Upload className="h-3 w-3" />
-                  <span>Upload / Change Photo</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  {coverImage && (
+                    <button
+                      type="button"
+                      onClick={() => setCoverImage("")}
+                      className="text-xs font-semibold text-rose-500 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsCoverModalOpen(true)}
+                    className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+                  >
+                    <Upload className="h-3 w-3" />
+                    <span>Upload / Change Photo</span>
+                  </button>
+                </div>
               </div>
 
-              {coverImage && (
-                <div className="relative h-40 sm:h-52 w-full rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 bg-stone-100 dark:bg-stone-800">
-                  <Image
+              {coverImage ? (
+                <div className="relative h-40 sm:h-52 w-full rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 bg-stone-900">
+                  <img
                     src={coverImage}
                     alt="Article cover photo"
-                    fill
-                    className="object-cover"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.opacity = "0.5";
+                    }}
                   />
                   <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] text-white font-mono">
                     Cover Photo Active
                   </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() => setIsCoverModalOpen(true)}
+                  className="h-32 w-full rounded-xl border-2 border-dashed border-stone-300 dark:border-stone-700 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-800/50 transition-colors text-stone-500"
+                >
+                  <Upload className="h-5 w-5 text-amber-500" />
+                  <span className="text-xs font-bold">No cover photo set. Click to select an image.</span>
                 </div>
               )}
             </div>
@@ -574,12 +590,14 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
         <div className="p-6 sm:p-10 rounded-3xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 shadow-sm space-y-8 max-w-4xl mx-auto">
           {/* Cover Photo */}
           {coverImage && (
-            <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden shadow-md bg-stone-100 dark:bg-stone-800">
-              <Image
+            <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden shadow-md bg-stone-900">
+              <img
                 src={coverImage}
                 alt={title || "Cover photo"}
-                fill
-                className="object-cover"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.opacity = "0.5";
+                }}
               />
             </div>
           )}
@@ -608,7 +626,7 @@ export function Editor({ initialPost, mode = "create" }: EditorProps) {
 
           {/* Rendered Story Body */}
           <div className="space-y-6">
-            <ArticleContent content={content || "*Your story content will appear here...*"} />
+            <ArticleContent content={content || "*Your story content will appear here...*"} coverImage={coverImage} />
           </div>
         </div>
       )}

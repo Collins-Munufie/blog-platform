@@ -39,6 +39,7 @@ export function Navbar() {
 
   const navLinks = [
     { label: "Articles", href: "/" },
+    { label: "Studio", href: "/dashboard" },
     { label: "Series", href: "/series" },
     { label: "Archive", href: "/archive" },
     { label: "Topics", href: "/categories" },

@@ -217,29 +217,16 @@ export function HeroPost({ post }: { post: Post }) {
         <div className="lg:col-span-5 flex flex-col justify-between">
           <Link
             href={`/blog/${post.slug}`}
-            className="block relative aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-stone-700/80 group bg-stone-950/90 p-2.5"
+            className="block relative aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-stone-700/80 group bg-stone-900"
           >
-            {/* Ambient subtle blur so badges/square assets blend seamlessly */}
-            <div className="absolute inset-0 overflow-hidden opacity-25 blur-xl scale-110 pointer-events-none">
-              <Image
-                src={post.coverImage}
-                alt=""
-                fill
-                className="object-cover"
-              />
-            </div>
-
-            {/* Crisp unclipped main image */}
-            <div className="relative h-full w-full">
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 440px"
-                className="object-contain transition-transform duration-700 group-hover:scale-105"
-              />
-            </div>
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.opacity = "0.5";
+              }}
+            />
           </Link>
 
           {/* Author Badge cleanly positioned below the image frame (NO OVERLAP) */}
