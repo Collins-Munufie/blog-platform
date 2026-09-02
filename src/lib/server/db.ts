@@ -147,15 +147,22 @@ export const db = {
     const tags = data.tags.filter((t) => input.tagIds?.includes(t.id));
     const author = data.authors[0];
 
-    const cleanCover = input.coverImage?.includes("photo-1526374965328-7f61d4dc18c5")
-      ? DEFAULT_COVER
-      : input.coverImage || DEFAULT_COVER;
+    let cleanCover = input.coverImage;
+    if (input.content) {
+      const match = input.content.match(/!\[.*?\]\((.*?)\)/);
+      if (match && match[1] && (!cleanCover || cleanCover === DEFAULT_COVER || cleanCover.includes("photo-1526374965328-7f61d4dc18c5"))) {
+        cleanCover = match[1];
+      }
+    }
+    if (!cleanCover || cleanCover.includes("photo-1526374965328-7f61d4dc18c5")) {
+      cleanCover = DEFAULT_COVER;
+    }
 
     const newPost: Post = {
       id: `post-${Date.now()}`,
       slug: input.slug || slugify(input.title),
       title: input.title,
-      excerpt: input.excerpt || input.content.slice(0, 140) + "...",
+      excerpt: input.excerpt || input.content.replace(/!\[.*?\]\(.*?\)/g, "").slice(0, 140) + "...",
       content: input.content,
       coverImage: cleanCover,
       category,
@@ -181,6 +188,13 @@ export const db = {
     const index = data.posts.findIndex((p) => p.id === id);
     if (index === -1) {
       throw new Error(`Post ${id} not found`);
+    }
+
+    if (updates.content) {
+      const match = updates.content.match(/!\[.*?\]\((.*?)\)/);
+      if (match && match[1] && (!updates.coverImage || updates.coverImage === DEFAULT_COVER || updates.coverImage.includes("photo-1526374965328-7f61d4dc18c5"))) {
+        updates.coverImage = match[1];
+      }
     }
 
     if (updates.coverImage && updates.coverImage.includes("photo-1526374965328-7f61d4dc18c5")) {

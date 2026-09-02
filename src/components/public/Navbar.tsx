@@ -19,12 +19,22 @@ export function Navbar() {
   const pathname = usePathname();
 
   React.useEffect(() => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem("devlog_saved_bookmarks") || "[]"
-      );
-      setBookmarkCount(saved.length);
-    } catch {}
+    const syncBookmarks = () => {
+      try {
+        const saved = JSON.parse(
+          localStorage.getItem("devlog_saved_bookmarks") || "[]"
+        );
+        setBookmarkCount(saved.length);
+      } catch {}
+    };
+
+    syncBookmarks();
+    window.addEventListener("bookmarks_updated", syncBookmarks);
+    window.addEventListener("storage", syncBookmarks);
+    return () => {
+      window.removeEventListener("bookmarks_updated", syncBookmarks);
+      window.removeEventListener("storage", syncBookmarks);
+    };
   }, [pathname]);
 
   const navLinks = [

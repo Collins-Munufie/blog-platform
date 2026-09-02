@@ -5,11 +5,18 @@ import { calculateReadingTime, slugify } from "../utils";
 const STORAGE_KEY = "devlog_posts_store";
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80";
 
-function sanitizeCoverImage(url?: string): string {
-  if (!url || url.includes("photo-1526374965328-7f61d4dc18c5")) {
+export function resolveCoverImage(coverImage?: string, content?: string): string {
+  // If the author uploaded an image inside the content, prioritize their uploaded image
+  if (content) {
+    const match = content.match(/!\[.*?\]\((.*?)\)/);
+    if (match && match[1] && (!coverImage || coverImage === DEFAULT_COVER || coverImage.includes("photo-1526374965328-7f61d4dc18c5"))) {
+      return match[1];
+    }
+  }
+  if (!coverImage || coverImage.includes("photo-1526374965328-7f61d4dc18c5")) {
     return DEFAULT_COVER;
   }
-  return url;
+  return coverImage;
 }
 
 declare global {
@@ -19,7 +26,7 @@ declare global {
 function getInitialPosts(): Post[] {
   return MOCK_POSTS.map((p) => ({
     ...p,
-    coverImage: sanitizeCoverImage(p.coverImage),
+    coverImage: resolveCoverImage(p.coverImage, p.content),
   }));
 }
 
@@ -31,7 +38,7 @@ function getStoredPosts(): Post[] {
         const parsed = JSON.parse(stored) as Post[];
         return parsed.map((p) => ({
           ...p,
-          coverImage: sanitizeCoverImage(p.coverImage),
+          coverImage: resolveCoverImage(p.coverImage, p.content),
         }));
       }
     } catch {}
@@ -123,7 +130,7 @@ export async function getFeaturedPosts(): Promise<Post[]> {
 }
 
 export async function createPost(input: CreatePostInput): Promise<Post> {
-  const cleanCover = sanitizeCoverImage(input.coverImage);
+  const realCover = resolveCoverImage(input.coverImage, input.content);
   const posts = getStoredPosts();
   const category = MOCK_CATEGORIES.find((c) => c.id === input.categoryId) || MOCK_CATEGORIES[0];
   const tags = MOCK_TAGS.filter((t) => input.tagIds?.includes(t.id));
@@ -133,9 +140,9 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     id: `post-${Date.now()}`,
     slug: input.slug || slugify(input.title),
     title: input.title,
-    excerpt: input.excerpt || input.content.slice(0, 140) + "...",
+    excerpt: input.excerpt || input.content.replace(/!\[.*?\]\(.*?\)/g, "").slice(0, 140) + "...",
     content: input.content,
-    coverImage: cleanCover,
+    coverImage: realCover,
     category,
     tags,
     author,
@@ -143,7 +150,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     language: input.language || 'en',
     publishedAt: new Date().toISOString(),
     readingTimeMinutes: calculateReadingTime(input.content),
-    views: 0,
+    views: 1,
     likes: 0,
     bookmarksCount: 0,
     featured: input.status === "published",
@@ -165,8 +172,8 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
 }
 
 export async function updatePost(id: string, updates: Partial<Post>): Promise<Post> {
-  if (updates.coverImage) {
-    updates.coverImage = sanitizeCoverImage(updates.coverImage);
+  if (updates.coverImage || updates.content) {
+    updates.coverImage = resolveCoverImage(updates.coverImage, updates.content);
   }
 
   const posts = getStoredPosts();
@@ -213,15 +220,32 @@ export async function deletePost(id: string): Promise<boolean> {
 
 export async function toggleLikePost(id: string): Promise<number> {
   const posts = getStoredPosts();
-  const post = posts.find((p) => p.id === id);
+  const post = posts.find((p) => p.id === id || p.slug === id);
   if (post) {
     post.likes = (post.likes || 0) + 1;
     saveStoredPosts(posts);
 
     if (typeof window !== "undefined") {
-      fetch(`/api/posts/${id}/like`, { method: "POST" }).catch(() => {});
+      fetch(`/api/posts/${post.id}/like`, { method: "POST" }).catch(() => {});
+      window.dispatchEvent(new CustomEvent("likes_updated", { detail: { id: post.id, likes: post.likes } }));
     }
     return post.likes;
+  }
+  return 0;
+}
+
+export async function incrementPostView(id: string): Promise<number> {
+  const posts = getStoredPosts();
+  const post = posts.find((p) => p.id === id || p.slug === id);
+  if (post) {
+    post.views = (post.views || 0) + 1;
+    saveStoredPosts(posts);
+
+    if (typeof window !== "undefined") {
+      fetch(`/api/posts/${post.id}/view`, { method: "POST" }).catch(() => {});
+      window.dispatchEvent(new CustomEvent("views_updated", { detail: { id: post.id, views: post.views } }));
+    }
+    return post.views;
   }
   return 0;
 }

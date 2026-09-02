@@ -17,6 +17,7 @@ interface PostCardProps {
 export function PostCard({ post, variant = "default" }: PostCardProps) {
   const [isBookmarked, setIsBookmarked] = React.useState(false);
   const [likes, setLikes] = React.useState(post.likes || 0);
+  const [views, setViews] = React.useState(post.views || 0);
   const [isLiked, setIsLiked] = React.useState(false);
   const { toast } = useToast();
 
@@ -32,6 +33,26 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
       ) as string[];
       setIsLiked(likedList.includes(post.id));
     } catch {}
+
+    const handleLikesSync = (e: any) => {
+      if (e.detail?.id === post.id) {
+        setLikes(e.detail.likes);
+      }
+    };
+
+    const handleViewsSync = (e: any) => {
+      if (e.detail?.id === post.id) {
+        setViews(e.detail.views);
+      }
+    };
+
+    window.addEventListener("likes_updated", handleLikesSync);
+    window.addEventListener("views_updated", handleViewsSync);
+
+    return () => {
+      window.removeEventListener("likes_updated", handleLikesSync);
+      window.removeEventListener("views_updated", handleViewsSync);
+    };
   }, [post.id]);
 
   const handleLikeToggle = (e: React.MouseEvent) => {
@@ -66,7 +87,6 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
   const handleBookmarkToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     try {
       const saved = JSON.parse(
         localStorage.getItem("devlog_saved_bookmarks") || "[]"
@@ -76,11 +96,13 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
         const next = saved.filter((id) => id !== post.id);
         localStorage.setItem("devlog_saved_bookmarks", JSON.stringify(next));
         setIsBookmarked(false);
+        window.dispatchEvent(new Event("bookmarks_updated"));
         toast({ title: "Removed from reading list", type: "info" });
       } else {
         const next = [...saved, post.id];
         localStorage.setItem("devlog_saved_bookmarks", JSON.stringify(next));
         setIsBookmarked(true);
+        window.dispatchEvent(new Event("bookmarks_updated"));
         toast({
           title: "Saved to Reading List",
           description: "Access this story anytime in your Saved collection.",
@@ -98,34 +120,61 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
     window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
   };
 
+  if (variant === "compact") {
+    return (
+      <article className="group py-3 border-b border-stone-100 dark:border-stone-800 last:border-0 flex items-center justify-between gap-4">
+        <div className="space-y-1 min-w-0">
+          <span className="editorial-tag text-[10px] font-bold px-2 py-0.5 rounded-full">
+            {post.category.name}
+          </span>
+          <Link href={`/blog/${post.slug}`}>
+            <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-1 font-heading">
+              {post.title}
+            </h4>
+          </Link>
+          <div className="flex items-center gap-2 text-[11px] text-stone-400 font-mono">
+            <span>{formatDate(post.publishedAt)}</span>
+            <span>•</span>
+            <span>{post.readingTimeMinutes} min read</span>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   if (variant === "horizontal") {
     return (
-      <article className="group card-simple flex flex-col sm:flex-row gap-5 p-5 rounded-2xl relative">
+      <article className="group card-simple p-4 sm:p-5 flex flex-col sm:flex-row gap-5 rounded-2xl relative">
         <Link
           href={`/blog/${post.slug}`}
-          className="relative aspect-[16/10] sm:w-52 sm:aspect-[4/3] rounded-xl overflow-hidden shrink-0 bg-stone-100 dark:bg-stone-800"
+          className="relative aspect-[16/10] sm:aspect-square sm:w-44 rounded-xl overflow-hidden shrink-0 bg-stone-900/90 flex items-center justify-center p-1.5"
         >
-          <Image
-            src={post.coverImage}
-            alt={post.title}
-            fill
-            sizes="(max-width: 640px) 100vw, 220px"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          {/* Subtle Ambient blur */}
+          <div className="absolute inset-0 overflow-hidden opacity-20 blur-md scale-110 pointer-events-none">
+            <Image src={post.coverImage} alt="" fill className="object-cover" />
+          </div>
+          <div className="relative h-full w-full">
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              sizes="(max-width: 640px) 100vw, 180px"
+              className="object-contain transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
         </Link>
 
-        <div className="flex flex-col justify-between flex-1 space-y-3">
+        <div className="flex-1 flex flex-col justify-between space-y-3">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5">
-                <Link href={`/categories?slug=${post.category.slug}`}>
-                  <span className="editorial-tag text-[11px] font-bold px-2.5 py-0.5 rounded-full hover:underline">
-                    {post.category.name}
-                  </span>
-                </Link>
+              <div className="flex items-center gap-2">
+                <span className="editorial-tag text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                  {post.category.name}
+                </span>
                 {post.series && (
-                  <span className="text-[10px] font-bold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <Layers className="h-2.5 w-2.5" /> Series
+                  <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <Layers className="h-3 w-3" />
+                    <span>Series</span>
                   </span>
                 )}
               </div>
@@ -171,8 +220,8 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
               {post.author.name} • {formatDate(post.publishedAt)}
             </Link>
             <div className="flex items-center gap-3 font-mono text-xs">
-              <span className="flex items-center gap-1" title={`${post.views || 0} reads`}>
-                <Eye className="h-3.5 w-3.5 text-stone-400" /> {formatCompactNumber(post.views || 0)}
+              <span className="flex items-center gap-1" title={`${views} reads`}>
+                <Eye className="h-3.5 w-3.5 text-stone-400" /> {formatCompactNumber(views)}
               </span>
               <button
                 type="button"
@@ -193,32 +242,44 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
   }
 
   return (
-    <article className="group card-simple flex flex-col justify-between overflow-hidden rounded-2xl relative">
+    <article className="group card-simple flex flex-col justify-between overflow-hidden rounded-2xl relative shadow-sm border border-stone-200 dark:border-stone-800">
       <div>
-        {/* Cover Image */}
+        {/* Cover Image Container (Ambient Blur + Crisp Contain) */}
         <Link
           href={`/blog/${post.slug}`}
-          className="relative aspect-[16/10] overflow-hidden block bg-stone-100 dark:bg-stone-800"
+          className="relative aspect-[16/10] overflow-hidden block bg-stone-950/90 p-2 border-b border-stone-100 dark:border-stone-800"
         >
-          <Image
-            src={post.coverImage}
-            alt={post.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-          <div className="absolute top-3 left-3 flex items-center gap-1.5">
-            <span className="editorial-tag text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm bg-white/90 dark:bg-stone-900/90">
+          {/* Ambient subtle blur */}
+          <div className="absolute inset-0 overflow-hidden opacity-25 blur-md scale-110 pointer-events-none">
+            <Image
+              src={post.coverImage}
+              alt=""
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="relative h-full w-full">
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-contain transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+            <span className="editorial-tag text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm bg-white/95 dark:bg-stone-900/95">
               {post.category.name}
             </span>
             {post.series && (
-              <span className="text-[10px] font-bold bg-stone-900/80 text-[#f59e0b] px-2 py-0.5 rounded-full backdrop-blur-sm">
+              <span className="text-[10px] font-bold bg-stone-900/90 text-[#f59e0b] px-2 py-0.5 rounded-full backdrop-blur-sm">
                 Series
               </span>
             )}
           </div>
 
-          <div className="absolute top-3 right-3 flex items-center gap-1">
+          <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
             <button
               type="button"
               onClick={handleWhatsAppShare}
@@ -261,42 +322,29 @@ export function PostCard({ post, variant = "default" }: PostCardProps) {
         </div>
       </div>
 
-      {/* Footer Info */}
-      <div className="p-5 pt-0">
-        <div className="flex items-center justify-between border-t border-stone-100 pt-3 dark:border-stone-800">
-          <Link
-            href={`/about`}
-            className="flex items-center gap-2 group/author"
+      {/* Footer info */}
+      <div className="p-5 pt-0 flex items-center justify-between text-xs text-stone-500 border-t border-stone-100 dark:border-stone-800/60 mt-3">
+        <Link
+          href={`/about`}
+          className="hover:text-stone-900 dark:hover:text-white transition-colors font-medium"
+        >
+          {post.author.name}
+        </Link>
+        <div className="flex items-center gap-3 font-mono text-xs">
+          <span className="flex items-center gap-1" title={`${views} reads`}>
+            <Eye className="h-3.5 w-3.5 text-stone-400" /> {formatCompactNumber(views)}
+          </span>
+          <button
+            type="button"
+            onClick={handleLikeToggle}
+            className={`flex items-center gap-1 hover:scale-105 transition-transform ${
+              isLiked ? "text-rose-500 font-bold" : "text-stone-500"
+            }`}
+            title={isLiked ? "Liked" : "Click to like"}
           >
-            <Image
-              src={post.author.avatar || "/khophi_profile.jpg"}
-              alt={post.author.name}
-              width={24}
-              height={24}
-              className="rounded-full object-cover ring-1 ring-stone-300 h-6 w-6"
-            />
-            <span className="text-xs font-semibold text-stone-800 dark:text-stone-200 group-hover/author:text-amber-600">
-              {post.author.name}
-            </span>
-          </Link>
-
-          <div className="flex items-center gap-2.5 text-xs text-stone-500 font-mono">
-            <span className="flex items-center gap-1" title={`${post.views || 0} reads`}>
-              <Eye className="h-3.5 w-3.5" />
-              {formatCompactNumber(post.views || 0)}
-            </span>
-            <button
-              type="button"
-              onClick={handleLikeToggle}
-              className={`flex items-center gap-1 hover:scale-105 transition-transform ${
-                isLiked ? "text-rose-500 font-bold" : "text-stone-500"
-              }`}
-              title={isLiked ? "Liked" : "Click to like"}
-            >
-              <Heart className={`h-3.5 w-3.5 text-rose-500 ${isLiked ? "fill-rose-500" : ""}`} />
-              <span>{formatCompactNumber(likes)}</span>
-            </button>
-          </div>
+            <Heart className={`h-3.5 w-3.5 text-rose-500 ${isLiked ? "fill-rose-500" : ""}`} />
+            <span>{formatCompactNumber(likes)}</span>
+          </button>
         </div>
       </div>
     </article>

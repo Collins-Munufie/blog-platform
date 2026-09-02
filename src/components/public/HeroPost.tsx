@@ -11,7 +11,6 @@ import {
   ArrowRight,
   BookOpen,
   MessageCircle,
-  Layers,
 } from "lucide-react";
 import { Post } from "@/lib/types";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
@@ -21,6 +20,7 @@ import { useToast } from "@/components/ui/Toast";
 export function HeroPost({ post }: { post: Post }) {
   const [isBookmarked, setIsBookmarked] = React.useState(false);
   const [likes, setLikes] = React.useState(post.likes || 0);
+  const [views, setViews] = React.useState(post.views || 0);
   const [isLiked, setIsLiked] = React.useState(false);
   const { toast } = useToast();
 
@@ -36,6 +36,27 @@ export function HeroPost({ post }: { post: Post }) {
       ) as string[];
       setIsLiked(likedList.includes(post.id));
     } catch {}
+
+    // Real-time synchronization listeners
+    const handleLikesSync = (e: any) => {
+      if (e.detail?.id === post.id) {
+        setLikes(e.detail.likes);
+      }
+    };
+
+    const handleViewsSync = (e: any) => {
+      if (e.detail?.id === post.id) {
+        setViews(e.detail.views);
+      }
+    };
+
+    window.addEventListener("likes_updated", handleLikesSync);
+    window.addEventListener("views_updated", handleViewsSync);
+
+    return () => {
+      window.removeEventListener("likes_updated", handleLikesSync);
+      window.removeEventListener("views_updated", handleViewsSync);
+    };
   }, [post.id]);
 
   const handleLikeToggle = (e: React.MouseEvent) => {
@@ -79,11 +100,13 @@ export function HeroPost({ post }: { post: Post }) {
         const next = saved.filter((id) => id !== post.id);
         localStorage.setItem("devlog_saved_bookmarks", JSON.stringify(next));
         setIsBookmarked(false);
+        window.dispatchEvent(new Event("bookmarks_updated"));
         toast({ title: "Removed from reading list", type: "info" });
       } else {
         const next = [...saved, post.id];
         localStorage.setItem("devlog_saved_bookmarks", JSON.stringify(next));
         setIsBookmarked(true);
+        window.dispatchEvent(new Event("bookmarks_updated"));
         toast({
           title: "Saved to Reading List",
           description: "Access this story anytime in your Saved collection.",
@@ -102,31 +125,22 @@ export function HeroPost({ post }: { post: Post }) {
   };
 
   return (
-    <article className="featured-editorial rounded-3xl p-6 sm:p-8 lg:p-10 relative overflow-hidden shadow-xl border border-stone-800">
-      <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
-        {/* Left Column: Metadata, Title & Actions */}
-        <div className="lg:col-span-7 space-y-5">
-          {/* Badges */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#f59e0b] text-[#0f172a] shadow-sm">
+    <article className="relative overflow-hidden rounded-3xl bg-[#08214e] text-white shadow-2xl border border-amber-400/20">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-6 sm:p-8 lg:p-10 items-center">
+        {/* Left Column: Headline & Metadata */}
+        <div className="lg:col-span-7 space-y-4">
+          {/* Tag, Category & Read Time */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#f59e0b] text-[#08214e] shadow-sm">
               Featured Story
             </span>
-
-            {post.series && (
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-amber-200 border border-white/15 flex items-center gap-1">
-                <Layers className="h-3 w-3" />
-                {post.series.title}
-              </span>
-            )}
-
-            <span className="px-3 py-1 rounded-full text-xs font-medium text-stone-300 bg-white/5 border border-white/10">
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white backdrop-blur-sm">
               {post.category.name}
             </span>
-
-            <div className="flex items-center gap-1 text-xs text-stone-300">
-              <Clock className="h-3.5 w-3.5" />
-              <span>{post.readingTimeMinutes} min read</span>
-            </div>
+            <span className="text-xs text-stone-300 font-mono flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {post.readingTimeMinutes} min read
+            </span>
           </div>
 
           {/* Title */}
@@ -141,25 +155,25 @@ export function HeroPost({ post }: { post: Post }) {
             {post.excerpt}
           </p>
 
-          {/* Interactive metadata chips */}
+          {/* Real-time interactive metadata chips */}
           <div className="flex flex-wrap items-center gap-4 py-1 text-xs text-stone-300 font-medium">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5" title="Real-time readers count">
               <Eye className="h-4 w-4 text-[#f59e0b]" />
-              <span className="font-bold text-white">{formatCompactNumber(post.views || 0)}</span> Reads
+              <span className="font-bold text-white font-mono">{formatCompactNumber(views)}</span> Reads
             </div>
 
-            {/* Clickable Like Button on Hero Card */}
+            {/* Clickable Like Button */}
             <button
               onClick={handleLikeToggle}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
                 isLiked
                   ? "bg-rose-500/20 text-rose-300 border border-rose-400/40 scale-105"
                   : "bg-white/10 text-stone-300 hover:bg-white/20 hover:text-white"
               }`}
-              title={isLiked ? "Unlike story" : "Like story"}
+              title={isLiked ? "Unlike story" : "Like story (Real-time)"}
             >
               <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-rose-400 text-rose-400" : ""}`} />
-              <span>{formatCompactNumber(likes)}</span>
+              <span className="font-mono">{formatCompactNumber(likes)}</span>
             </button>
 
             <span className="text-amber-300 font-semibold font-mono">📍 Accra, Ghana</span>
@@ -199,41 +213,54 @@ export function HeroPost({ post }: { post: Post }) {
           </div>
         </div>
 
-        {/* Right Column: Hero Cover Photo & Author Card */}
-        <div className="lg:col-span-5 relative">
+        {/* Right Column: Hero Cover Photo (Unclipped, Crisp, Zero Overlap) */}
+        <div className="lg:col-span-5 flex flex-col justify-between">
           <Link
             href={`/blog/${post.slug}`}
-            className="block relative aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-stone-700 group"
+            className="block relative aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-stone-700/80 group bg-stone-950/90 p-2.5"
           >
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 440px"
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+            {/* Ambient subtle blur so badges/square assets blend seamlessly */}
+            <div className="absolute inset-0 overflow-hidden opacity-25 blur-xl scale-110 pointer-events-none">
+              <Image
+                src={post.coverImage}
+                alt=""
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            {/* Crisp unclipped main image */}
+            <div className="relative h-full w-full">
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 440px"
+                className="object-contain transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
           </Link>
 
-          {/* Author Badge */}
+          {/* Author Badge cleanly positioned below the image frame (NO OVERLAP) */}
           <Link
             href={`/about`}
-            className="absolute -bottom-3 left-4 right-4 bg-stone-900/90 backdrop-blur-md p-3 rounded-xl flex items-center justify-between gap-3 text-xs border border-stone-700 hover:bg-stone-800 transition-all shadow-lg"
+            className="mt-3.5 bg-stone-900/90 backdrop-blur-md p-3 rounded-2xl flex items-center justify-between gap-3 text-xs border border-stone-800 hover:bg-stone-800 transition-all shadow-md group"
           >
             <div className="flex items-center gap-2.5">
               <Image
                 src={post.author.avatar || "/khophi_profile.jpg"}
                 alt={post.author.name}
-                width={32}
-                height={32}
+                width={34}
+                height={34}
                 className="rounded-full object-cover ring-1 ring-[#f59e0b] h-8 w-8"
               />
               <div>
-                <p className="font-bold text-white leading-tight">{post.author.name}</p>
+                <p className="font-bold text-white leading-tight group-hover:text-amber-400 transition-colors">{post.author.name}</p>
                 <p className="text-[10px] text-stone-400">Written from {post.author.location || "Accra, Ghana"}</p>
               </div>
             </div>
-            <span className="text-[10px] font-bold text-[#f59e0b] bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-500/30">
+            <span className="text-[10px] font-bold text-[#f59e0b] bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/30">
               Author
             </span>
           </Link>

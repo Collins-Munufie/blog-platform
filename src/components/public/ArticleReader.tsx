@@ -3,11 +3,11 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Eye, Calendar, ArrowLeft, Twitter, Github, Globe, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Clock, Eye, Calendar, ArrowLeft, Twitter, Github, Edit, Trash2, Loader2 } from "lucide-react";
 import { Post, Comment } from "@/lib/types";
-import { getPostBySlug, getPosts } from "@/lib/api/posts";
+import { getPostBySlug, getPosts, deletePost, incrementPostView } from "@/lib/api/posts";
 import { getCommentsByPostId } from "@/lib/api/comments";
-import { Badge } from "@/components/ui/Badge";
 import { ArticleContent } from "@/components/public/ArticleContent";
 import { TableOfContents, extractHeadings } from "@/components/public/TableOfContents";
 import { InteractionBar } from "@/components/public/InteractionBar";
@@ -16,6 +16,8 @@ import { PostCard } from "@/components/public/PostCard";
 import { ReadingProgressBar } from "@/components/public/ReadingProgressBar";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { DeleteConfirmModal } from "@/components/ui/DeleteConfirmModal";
+import { useToast } from "@/components/ui/Toast";
 
 export function ArticleReader({
   slug,
@@ -25,9 +27,15 @@ export function ArticleReader({
   initialPost?: Post | null;
 }) {
   const [post, setPost] = React.useState<Post | null>(initialPost || null);
+  const [views, setViews] = React.useState<number>(initialPost?.views || 1);
   const [comments, setComments] = React.useState<Comment[]>([]);
   const [relatedPosts, setRelatedPosts] = React.useState<Post[]>([]);
   const [loading, setLoading] = React.useState(!initialPost);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  const router = useRouter();
+  const { toast } = useToast();
 
   React.useEffect(() => {
     const resolveArticle = async () => {
@@ -38,6 +46,11 @@ export function ArticleReader({
       }
 
       if (currentPost) {
+        setViews(currentPost.views || 1);
+        incrementPostView(currentPost.id).then((newViews) => {
+          if (newViews > 0) setViews(newViews);
+        });
+
         const [cmts, related] = await Promise.all([
           getCommentsByPostId(currentPost.id),
           getPosts({ categorySlug: currentPost.category.slug, limit: 3 }),
@@ -50,6 +63,29 @@ export function ArticleReader({
 
     resolveArticle();
   }, [slug]);
+
+  const handleDeleteConfirm = async () => {
+    if (!post) return;
+    setIsDeleting(true);
+    try {
+      await deletePost(post.id);
+      toast({
+        title: "Article Deleted",
+        description: `"${post.title}" has been permanently removed.`,
+        type: "info",
+      });
+      setIsDeleteModalOpen(false);
+      router.push("/dashboard/posts");
+    } catch {
+      toast({
+        title: "Delete Failed",
+        description: "Could not delete article. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -68,7 +104,7 @@ export function ArticleReader({
             Story Not Found
           </h2>
           <p className="text-xs text-stone-500 leading-relaxed">
-            The article &ldquo;{slug}&rdquo; is not available or may still be in draft mode.
+            The article &ldquo;{slug}&rdquo; is not available or may have been deleted.
           </p>
           <Link href="/">
             <Button size="sm" className="gap-2 rounded-xl text-xs bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900">
@@ -87,8 +123,8 @@ export function ArticleReader({
     <>
       <ReadingProgressBar />
       <article className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Back Link & Category */}
-        <div className="mb-6 flex items-center justify-between">
+        {/* Top Action & Category Bar */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-xs font-bold text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white transition-colors"
@@ -96,17 +132,43 @@ export function ArticleReader({
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Stories</span>
           </Link>
+
+          {/* Author / Editorial Control Buttons */}
           <div className="flex items-center gap-2">
             {post.status === "draft" && (
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300">
                 Draft Preview
               </span>
             )}
+            
             <Link href={`/categories?slug=${post.category.slug}`}>
               <span className="editorial-tag text-xs font-bold px-3 py-1 rounded-full">
                 {post.category.name}
               </span>
             </Link>
+
+            <Link href={`/dashboard/posts/${post.id}/edit`}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1.5 rounded-xl border-stone-200 dark:border-stone-700"
+                title="Edit this article in Studio"
+              >
+                <Edit className="h-3.5 w-3.5 text-blue-500" />
+                <span className="hidden sm:inline">Edit</span>
+              </Button>
+            </Link>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="h-8 text-xs gap-1.5 rounded-xl border-rose-200 dark:border-rose-900/60 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+              title="Permanently delete this published article"
+            >
+              <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+              <span>Delete</span>
+            </Button>
           </div>
         </div>
 
@@ -154,25 +216,30 @@ export function ArticleReader({
                 <Clock className="h-3.5 w-3.5" />
                 {post.readingTimeMinutes} min read
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1" title="Live real-time reader counter">
                 <Eye className="h-3.5 w-3.5 text-amber-600" />
-                {formatCompactNumber(post.views || 0)} reads
+                {formatCompactNumber(views)} reads
               </span>
             </div>
           </div>
         </header>
 
-        {/* Hero Cover Image */}
+        {/* Hero Cover Image (Crisp unclipped container with ambient blur) */}
         {post.coverImage && (
-          <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden rounded-3xl mb-12 shadow-md border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-800">
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              priority
-              sizes="(max-width: 1280px) 100vw, 1200px"
-              className="object-cover"
-            />
+          <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden rounded-3xl mb-12 shadow-xl border border-stone-200 dark:border-stone-800 bg-stone-950/90 p-3 flex items-center justify-center">
+            <div className="absolute inset-0 overflow-hidden opacity-25 blur-xl scale-110 pointer-events-none">
+              <Image src={post.coverImage} alt="" fill className="object-cover" />
+            </div>
+            <div className="relative h-full w-full">
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                priority
+                sizes="(max-width: 1280px) 100vw, 1200px"
+                className="object-contain"
+              />
+            </div>
           </div>
         )}
 
@@ -206,7 +273,7 @@ export function ArticleReader({
               commentsCount={comments.length}
             />
 
-            {/* Author Bio & Sign-off Card */}
+            {/* Author Bio & Action Box */}
             <div className="p-6 rounded-3xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row items-start sm:items-center gap-5 shadow-sm">
               <Image
                 src={post.author.avatar || "/khophi_profile.jpg"}
@@ -231,15 +298,22 @@ export function ArticleReader({
                 <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
                   {post.author.bio}
                 </p>
-                <div className="pt-1">
+                <div className="pt-2 flex flex-wrap items-center gap-4 text-xs">
                   <a
                     href="https://wa.me/233240000000"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs font-bold text-[#128C7E] dark:text-[#25D366] hover:underline inline-flex items-center gap-1"
+                    className="font-bold text-[#128C7E] dark:text-[#25D366] hover:underline inline-flex items-center gap-1"
                   >
                     Send Khophi a thought on WhatsApp →
                   </a>
+                  <button
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="text-xs text-rose-500 hover:text-rose-700 font-semibold flex items-center gap-1 ml-auto"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Delete Story</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -294,6 +368,16 @@ export function ArticleReader({
           </section>
         )}
       </article>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Published Story"
+        itemTitle={post.title}
+        isDeleting={isDeleting}
+      />
     </>
   );
 }
