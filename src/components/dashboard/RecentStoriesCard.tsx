@@ -24,6 +24,34 @@ export function RecentStoriesCard({
 
   const { toast } = useToast();
 
+  React.useEffect(() => {
+    const syncLatest = async () => {
+      try {
+        const { getPosts } = await import("@/lib/api/posts");
+        const all = await getPosts({ status: "all" });
+        if (all && all.length > 0) {
+          setDrafts(all.filter((p) => p.status === "draft").slice(0, 3));
+          setPublished(all.filter((p) => p.status === "published").slice(0, 3));
+        }
+      } catch {}
+    };
+
+    syncLatest();
+
+    window.addEventListener("posts_updated", syncLatest);
+    window.addEventListener("storage", syncLatest);
+    window.addEventListener("focus", syncLatest);
+
+    const poll = setInterval(syncLatest, 3000);
+
+    return () => {
+      window.removeEventListener("posts_updated", syncLatest);
+      window.removeEventListener("storage", syncLatest);
+      window.removeEventListener("focus", syncLatest);
+      clearInterval(poll);
+    };
+  }, []);
+
   const handleDeleteConfirm = async () => {
     if (!postToDelete) return;
     setIsDeleting(true);

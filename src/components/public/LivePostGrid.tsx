@@ -28,7 +28,7 @@ export function LivePostGrid({ initialPosts, initialFeatured }: LivePostGridProp
   const [posts, setPosts] = React.useState<Post[]>(sanitizePosts(initialPosts));
 
   React.useEffect(() => {
-    // Sync latest posts from client store / localStorage immediately on mount
+    // Sync latest posts from server REST API / client store immediately
     const syncPosts = async () => {
       try {
         const latest = await getPosts({ status: "published" });
@@ -40,13 +40,38 @@ export function LivePostGrid({ initialPosts, initialFeatured }: LivePostGridProp
 
     syncPosts();
 
-    // Listen for real-time post creation / updates
+    // 1. Local window & storage events
     window.addEventListener("posts_updated", syncPosts);
     window.addEventListener("storage", syncPosts);
+    window.addEventListener("focus", syncPosts);
+
+    // 2. Mobile screen unlock / tab switching
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        syncPosts();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // 3. BroadcastChannel cross-tab / device messaging
+    let bc: BroadcastChannel | null = null;
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      bc = new BroadcastChannel("devlog_posts_sync");
+      bc.onmessage = () => {
+        syncPosts();
+      };
+    }
+
+    // 4. Multi-device live polling interval (3 seconds)
+    const pollInterval = setInterval(syncPosts, 3000);
 
     return () => {
       window.removeEventListener("posts_updated", syncPosts);
       window.removeEventListener("storage", syncPosts);
+      window.removeEventListener("focus", syncPosts);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      if (bc) bc.close();
+      clearInterval(pollInterval);
     };
   }, []);
 

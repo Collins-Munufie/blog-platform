@@ -55,7 +55,14 @@ function saveStoredPosts(posts: Post[]) {
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+      localStorage.setItem("devlog_last_sync", Date.now().toString());
       window.dispatchEvent(new Event("posts_updated"));
+
+      if ("BroadcastChannel" in window) {
+        const bc = new BroadcastChannel("devlog_posts_sync");
+        bc.postMessage({ type: "posts_updated", timestamp: Date.now() });
+        bc.close();
+      }
     } catch {}
   } else {
     globalThis.__GLOBAL_POSTS__ = posts;
@@ -72,6 +79,28 @@ export interface GetPostsParams {
 }
 
 export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
+  if (typeof window !== "undefined") {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params.status) queryParams.set("status", params.status);
+      if (params.categorySlug) queryParams.set("categorySlug", params.categorySlug);
+      if (params.tagSlug) queryParams.set("tagSlug", params.tagSlug);
+      if (params.query) queryParams.set("query", params.query);
+      if (params.limit) queryParams.set("limit", params.limit.toString());
+
+      const res = await fetch(`/api/posts?${queryParams.toString()}`);
+      if (res.ok) {
+        const apiPosts = await res.json();
+        if (Array.isArray(apiPosts) && apiPosts.length > 0) {
+          return apiPosts.map((p: any) => ({
+            ...p,
+            coverImage: resolveCoverImage(p.coverImage, p.content),
+          }));
+        }
+      }
+    } catch {}
+  }
+
   const posts = getStoredPosts();
   let result = [...posts];
 
