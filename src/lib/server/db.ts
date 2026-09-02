@@ -96,18 +96,18 @@ function getInitialData(): DatabaseSchema {
 }
 
 function loadDatabase(): DatabaseSchema {
-  if (!globalThis.__SERVER_DB__) {
-    try {
-      if (fs.existsSync(DB_FILE_PATH)) {
-        const raw = fs.readFileSync(DB_FILE_PATH, "utf-8");
-        globalThis.__SERVER_DB__ = JSON.parse(raw);
-      }
-    } catch {}
-
-    if (!globalThis.__SERVER_DB__) {
-      globalThis.__SERVER_DB__ = getInitialData();
-      saveDatabaseToDisk(globalThis.__SERVER_DB__);
+  try {
+    if (fs.existsSync(DB_FILE_PATH)) {
+      const raw = fs.readFileSync(DB_FILE_PATH, "utf-8");
+      const parsed = JSON.parse(raw);
+      globalThis.__SERVER_DB__ = parsed;
+      return parsed;
     }
+  } catch {}
+
+  if (!globalThis.__SERVER_DB__) {
+    globalThis.__SERVER_DB__ = getInitialData();
+    saveDatabaseToDisk(globalThis.__SERVER_DB__);
   }
   return globalThis.__SERVER_DB__;
 }

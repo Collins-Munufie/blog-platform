@@ -79,6 +79,7 @@ export interface GetPostsParams {
 }
 
 export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
+  let serverPosts: Post[] | null = null;
   if (typeof window !== "undefined") {
     try {
       const queryParams = new URLSearchParams();
@@ -92,7 +93,7 @@ export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
       if (res.ok) {
         const apiPosts = await res.json();
         if (Array.isArray(apiPosts) && apiPosts.length > 0) {
-          return apiPosts.map((p: any) => ({
+          serverPosts = apiPosts.map((p: any) => ({
             ...p,
             coverImage: resolveCoverImage(p.coverImage, p.content),
           }));
@@ -101,8 +102,18 @@ export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
     } catch {}
   }
 
-  const posts = getStoredPosts();
-  let result = [...posts];
+  const localPosts = getStoredPosts();
+  const mergedMap = new Map<string, Post>();
+
+  // Add local posts first
+  localPosts.forEach((p) => mergedMap.set(p.id, p));
+
+  // Overlay server posts (freshest server data)
+  if (serverPosts) {
+    serverPosts.forEach((p) => mergedMap.set(p.id, p));
+  }
+
+  let result = Array.from(mergedMap.values());
 
   if (params.status && params.status !== "all") {
     result = result.filter((p) => p.status === params.status);
@@ -136,6 +147,12 @@ export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
 
   if (params.limit) {
     result = result.slice(0, params.limit);
+  }
+
+  if (typeof window !== "undefined" && result.length > 0) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(mergedMap.values())));
+    } catch {}
   }
 
   return result;
