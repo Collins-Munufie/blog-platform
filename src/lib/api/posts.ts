@@ -216,17 +216,24 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
     seo: input.seo,
   };
 
-  const updated = [newPost, ...posts];
-  saveStoredPosts(updated);
-
   if (typeof window !== "undefined") {
-    fetch("/api/posts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newPost),
-    }).catch(() => {});
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPost),
+      });
+      if (res.ok) {
+        const serverPost = await res.json();
+        const finalPosts = [serverPost, ...posts.filter((p) => p.id !== serverPost.id)];
+        saveStoredPosts(finalPosts);
+        return serverPost;
+      }
+    } catch {}
   }
 
+  const updated = [newPost, ...posts];
+  saveStoredPosts(updated);
   return newPost;
 }
 

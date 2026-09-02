@@ -20,6 +20,9 @@ import {
 } from "@/lib/mock-data";
 import { calculateReadingTime, slugify } from "@/lib/utils";
 
+import fs from "fs";
+import path from "path";
+
 interface DatabaseSchema {
   posts: Post[];
   categories: Category[];
@@ -36,6 +39,19 @@ declare global {
 }
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80";
+const DB_FILE_PATH = path.join(process.cwd(), "src", "lib", "server", "posts-data.json");
+
+function saveDatabaseToDisk(data: DatabaseSchema) {
+  try {
+    const dir = path.dirname(DB_FILE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(data, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Failed writing persistent DB:", err);
+  }
+}
 
 function getInitialData(): DatabaseSchema {
   const cleanedPosts = MOCK_POSTS.map((p) => ({
@@ -81,7 +97,17 @@ function getInitialData(): DatabaseSchema {
 
 function loadDatabase(): DatabaseSchema {
   if (!globalThis.__SERVER_DB__) {
-    globalThis.__SERVER_DB__ = getInitialData();
+    try {
+      if (fs.existsSync(DB_FILE_PATH)) {
+        const raw = fs.readFileSync(DB_FILE_PATH, "utf-8");
+        globalThis.__SERVER_DB__ = JSON.parse(raw);
+      }
+    } catch {}
+
+    if (!globalThis.__SERVER_DB__) {
+      globalThis.__SERVER_DB__ = getInitialData();
+      saveDatabaseToDisk(globalThis.__SERVER_DB__);
+    }
   }
   return globalThis.__SERVER_DB__;
 }
@@ -180,6 +206,7 @@ export const db = {
     };
 
     data.posts.unshift(newPost);
+    saveDatabaseToDisk(data);
     return newPost;
   },
 
@@ -211,6 +238,7 @@ export const db = {
     };
 
     data.posts[index] = updated;
+    saveDatabaseToDisk(data);
     return updated;
   },
 
@@ -218,6 +246,7 @@ export const db = {
     const data = loadDatabase();
     const initialLen = data.posts.length;
     data.posts = data.posts.filter((p) => p.id !== id);
+    saveDatabaseToDisk(data);
     return data.posts.length < initialLen;
   },
 

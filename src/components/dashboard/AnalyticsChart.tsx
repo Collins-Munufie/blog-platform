@@ -94,7 +94,7 @@ export function AnalyticsChart({ data: initialData }: { data: ExtendedAnalyticsS
               {formatCompactNumber(data.totalViews)} Total Readers Reached
             </h2>
             <p className="text-xs sm:text-sm text-blue-100 max-w-xl leading-relaxed">
-              Your publication is experiencing a <strong className="text-amber-300 font-bold">+24.6% readership surge</strong> across Accra, West Africa, and tech diaspora readers this month.
+              Your publication is experiencing a <strong className="text-amber-300 font-bold">+24.6% readership surge</strong> across Sunyani, West Africa, and tech diaspora readers this month.
             </p>
           </div>
 

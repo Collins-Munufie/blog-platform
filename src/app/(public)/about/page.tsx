@@ -33,7 +33,7 @@ export default function AboutPage() {
               Khophi
             </h1>
             <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 font-medium">
-              Software Engineer &amp; Writer based in <span className="font-bold text-stone-900 dark:text-white">Accra, Ghana 🇬🇭</span>
+              Software Engineer &amp; Writer based in <span className="font-bold text-stone-900 dark:text-white">Sunyani, Ghana 🇬🇭</span>
             </p>
             <div className="flex items-center gap-3 text-xs text-stone-500 pt-1">
               <a
@@ -63,10 +63,10 @@ export default function AboutPage() {
             Hey! Thanks for stopping by my corner of the internet.
           </p>
           <p>
-            I’m a software architect and writer. I grew up in Ghana, studied computer science, spent a few years working with remote fintech teams across Europe, and eventually moved back to Accra to build full-time.
+            I’m a software architect and writer. I grew up in Ghana, studied computer science, spent a few years working with remote fintech teams across Europe, and eventually moved back to Sunyani to build full-time.
           </p>
           <p>
-            I started <strong className="text-stone-900 dark:text-white">khophi_the_blogger</strong> because most coverage of African tech either felt like corporate PR or distant theoretical analysis. I wanted a space to write honest, ground-truth essays on what building software here actually looks like — from Mobile Money (MoMo) settlement quirks to the thriving music and culture scene in Osu and Tema.
+            I started <strong className="text-stone-900 dark:text-white">khophi_the_blogger</strong> because most coverage of African tech either felt like corporate PR or distant theoretical analysis. I wanted a space to write honest, ground-truth essays on what building software here actually looks like — from Mobile Money (MoMo) settlement quirks to the thriving music and culture scene in Sunyani.
           </p>
         </div>
       </div>
@@ -90,10 +90,10 @@ export default function AboutPage() {
           <div className="p-4 rounded-2xl bg-white dark:bg-[#141a24] border border-stone-200 dark:border-stone-800 space-y-1.5 shadow-sm">
             <h3 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
               <Heart className="h-4 w-4 text-rose-600" />
-              <span>Culture, Music &amp; Accra Life</span>
+              <span>Culture, Music &amp; Sunyani Life</span>
             </h3>
             <p className="text-stone-600 dark:text-stone-300 leading-relaxed">
-              Behind the scenes in Tema home studios, Afrobeats streaming economics, and living in Accra.
+              Behind the scenes in Sunyani home studios, Afrobeats streaming economics, and living in Sunyani.
             </p>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function AboutPage() {
       <div className="p-6 rounded-3xl bg-stone-100 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 space-y-3">
         <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 font-heading flex items-center gap-2">
           <Coffee className="h-4 w-4 text-amber-600" />
-          <span>My Daily Workstation in Osu</span>
+          <span>My Daily Workstation in Sunyani</span>
         </h2>
         <ul className="space-y-1.5 text-xs text-stone-600 dark:text-stone-300 list-disc list-inside">
           <li><strong>Computer:</strong> MacBook Pro M3 Max (36GB RAM)</li>
@@ -119,7 +119,7 @@ export default function AboutPage() {
           Get in Touch
         </h2>
         <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
-          I read every message. If you’re building something interesting in Accra, want to discuss an essay, or just want to grab a coffee in Labone, send me a note:
+          I read every message. If you’re building something interesting in Sunyani, want to discuss an essay, or just want to grab a coffee in Sunyani, send me a note:
         </p>
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <a

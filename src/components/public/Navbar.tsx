@@ -64,7 +64,7 @@ export function Navbar() {
                   khophi<span className="text-[#f59e0b]">_the_blogger</span>
                 </span>
                 <span className="hidden sm:inline text-[9px] font-bold uppercase tracking-widest text-[#93a0b4] -mt-0.5">
-                  Accra • Africa • Tech &amp; Culture
+                  Sunyani • Ghana • Tech &amp; Culture
                 </span>
               </div>
             </Link>

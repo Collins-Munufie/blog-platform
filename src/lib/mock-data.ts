@@ -12,21 +12,21 @@ export const MOCK_FIELD_NOTES: FieldNote[] = [
   {
     id: 'fn-1',
     date: '3 hours ago',
-    location: 'Labone, Accra',
-    content: '☕ Spent the morning testing Starlink Mini speeds through heavy rain in Labone. Solid 145 Mbps down. Game changer for remote engineering teams in Ghana.',
+    location: 'Fiapre, Sunyani',
+    content: '☕ Spent the morning testing Starlink Mini speeds through heavy rain in Sunyani. Solid 145 Mbps down. Game changer for remote engineering teams in Ghana.',
     tag: 'Tech',
   },
   {
     id: 'fn-2',
     date: 'Yesterday',
-    location: 'Makola Market',
-    content: 'Talked to 6 cloth merchants in Makola today about why they still keep physical cash as a backup to MoMo QR payments. Writing up the field report for Thursday’s essay.',
+    location: 'Sunyani Central Market',
+    content: 'Talked to 6 merchants in Sunyani today about why they keep physical cash as a backup to MoMo QR payments. Writing up the field report for Thursday’s essay.',
     tag: 'Field Notes',
   },
   {
     id: 'fn-3',
     date: 'Aug 29',
-    location: 'Studio, Osu',
+    location: 'Studio, Sunyani',
     content: '🎧 Recording episode 14 of the podcast with Kwame on cross-border AfCFTA trade. Dropping this Friday!',
     tag: 'Podcast',
   },
@@ -36,7 +36,7 @@ export const MOCK_NOW = {
   currentProject: 'Building a low-latency GhIPSS payment gateway & writing weekly essays on African tech.',
   reading: '“The Prosperity Paradox” by Clayton Christensen & Efosa Ojomo',
   listening: 'Black Sherif, Gyakie, and Highlife classics on vinyl',
-  location: 'Accra, Ghana 🇬🇭 (Sunny 29°C)',
+  location: 'Sunyani, Ghana 🇬🇭 (Sunny 29°C)',
 };
 
 export const MOCK_AUTHORS: Author[] = [
@@ -45,9 +45,9 @@ export const MOCK_AUTHORS: Author[] = [
     name: 'Khophi',
     handle: 'khophi_the_blogger',
     avatar: '/khophi_profile.jpg',
-    bio: 'Hey! I’m Khophi. I write essays on building software, mobile money infrastructure, Afrobeats culture, and daily life in Accra, Ghana.',
+    bio: 'Hey! I’m Khophi. I write essays on building software, mobile money infrastructure, Afrobeats culture, and daily life in Sunyani, Ghana.',
     role: 'Engineer, Writer & Creator',
-    location: 'Accra, Ghana 🇬🇭',
+    location: 'Sunyani, Ghana 🇬🇭',
     twitter: 'https://x.com/cmunufie17588?s=11',
     github: 'https://github.com/khophi',
     website: 'https://khophitheblogger.com',

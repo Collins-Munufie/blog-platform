@@ -17,7 +17,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-xs text-[#2f3b4d] dark:text-slate-300 leading-relaxed">
-              Accra-based digital publication reporting on Silicon Accra tech innovation, Afrobeats economics, and Ghanaian culture.
+              Sunyani-based digital publication reporting on Sunyani tech innovation, Afrobeats economics, and Ghanaian culture.
             </p>
             <div className="flex items-center gap-3 text-slate-400">
               <a
@@ -135,7 +135,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-[#e2e8f2] dark:border-[#1e3a6a] flex flex-col sm:flex-row items-center justify-between text-xs text-[#93a0b4]">
-          <p>© {new Date().getFullYear()} khophi_the_blogger. All rights reserved. Accra, Ghana 🇬🇭</p>
+          <p>© {new Date().getFullYear()} khophi_the_blogger. All rights reserved. Sunyani, Ghana 🇬🇭</p>
           <div className="flex gap-4 mt-3 sm:mt-0 font-medium">
             <Link href="/about" className="hover:text-[#08214e] dark:hover:text-white">About Khophi</Link>
             <Link href="/feed.xml" className="hover:text-[#08214e] dark:hover:text-white">RSS Feed</Link>

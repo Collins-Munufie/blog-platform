@@ -28,17 +28,22 @@ export const metadata: Metadata = {
     template: "%s | khophi_the_blogger",
   },
   description:
-    "Accra-based digital publication reporting on Silicon Accra tech innovation, mobile money economics, Afrobeats, and Ghanaian culture.",
+    "Sunyani-based digital publication reporting on Sunyani tech innovation, mobile money economics, Afrobeats, and Ghanaian culture.",
   keywords: [
     "Khophi",
     "khophi_the_blogger",
-    "Ghana Tech",
-    "Accra Startups",
+    "Sunyani Tech",
+    "Sunyani Startups",
     "Mobile Money Ghana",
     "Afrobeats",
     "Black Stars Football",
   ],
   authors: [{ name: "Khophi", url: "https://khophitheblogger.com" }],
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
