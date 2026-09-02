@@ -36,17 +36,18 @@ function getStoredPosts(): Post[] {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as Post[];
-        return parsed.map((p) => ({
+        const clean = parsed.filter((p) => !["post-1", "post-2", "post-3", "post-4", "post-5"].includes(p.id));
+        return clean.map((p) => ({
           ...p,
           coverImage: resolveCoverImage(p.coverImage, p.content),
         }));
       }
     } catch {}
-    return getInitialPosts();
+    return [];
   }
 
   if (!globalThis.__GLOBAL_POSTS__) {
-    globalThis.__GLOBAL_POSTS__ = getInitialPosts();
+    globalThis.__GLOBAL_POSTS__ = [];
   }
   return globalThis.__GLOBAL_POSTS__;
 }
