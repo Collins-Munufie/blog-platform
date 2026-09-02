@@ -39,25 +39,23 @@ export function ArticleReader({
 
   React.useEffect(() => {
     const resolveArticle = async () => {
-      let currentPost = post;
-      if (!currentPost) {
-        currentPost = await getPostBySlug(slug);
-        setPost(currentPost);
-      }
+      try {
+        const currentPost = await getPostBySlug(slug);
+        if (currentPost) {
+          setPost(currentPost);
+          setViews(currentPost.views || 1);
+          incrementPostView(currentPost.id).then((newViews) => {
+            if (newViews > 0) setViews(newViews);
+          });
 
-      if (currentPost) {
-        setViews(currentPost.views || 1);
-        incrementPostView(currentPost.id).then((newViews) => {
-          if (newViews > 0) setViews(newViews);
-        });
-
-        const [cmts, related] = await Promise.all([
-          getCommentsByPostId(currentPost.id),
-          getPosts({ categorySlug: currentPost.category.slug, limit: 3 }),
-        ]);
-        setComments(cmts);
-        setRelatedPosts(related.filter((p) => p.id !== currentPost?.id).slice(0, 2));
-      }
+          const [cmts, related] = await Promise.all([
+            getCommentsByPostId(currentPost.id),
+            getPosts({ categorySlug: currentPost.category.slug, limit: 3 }),
+          ]);
+          setComments(cmts);
+          setRelatedPosts(related.filter((p) => p.id !== currentPost?.id).slice(0, 2));
+        }
+      } catch {}
       setLoading(false);
     };
 

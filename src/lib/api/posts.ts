@@ -142,14 +142,44 @@ export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const posts = getStoredPosts();
-  const post = posts.find((p) => p.slug === slug);
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch(`/api/posts/${encodeURIComponent(slug)}`);
+      if (res.ok) {
+        const item = await res.json();
+        if (item && !item.error && item.title) {
+          return {
+            ...item,
+            coverImage: resolveCoverImage(item.coverImage, item.content),
+          };
+        }
+      }
+    } catch {}
+  }
+
+  const posts = await getPosts({ status: "all" });
+  const post = posts.find((p) => p.slug === slug || p.id === slug);
   return post ? { ...post } : null;
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
-  const posts = getStoredPosts();
-  const post = posts.find((p) => p.id === id);
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch(`/api/posts/${encodeURIComponent(id)}`);
+      if (res.ok) {
+        const item = await res.json();
+        if (item && !item.error && item.title) {
+          return {
+            ...item,
+            coverImage: resolveCoverImage(item.coverImage, item.content),
+          };
+        }
+      }
+    } catch {}
+  }
+
+  const posts = await getPosts({ status: "all" });
+  const post = posts.find((p) => p.id === id || p.slug === id);
   return post ? { ...post } : null;
 }
 
