@@ -3,10 +3,9 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Clock, Eye, Calendar, ArrowLeft, Twitter, Github, Edit, Trash2, Loader2 } from "lucide-react";
+import { Clock, Eye, Calendar, ArrowLeft, Twitter, Github, Loader2 } from "lucide-react";
 import { Post, Comment } from "@/lib/types";
-import { getPostBySlug, getPosts, deletePost, incrementPostView } from "@/lib/api/posts";
+import { getPostBySlug, getPosts, incrementPostView } from "@/lib/api/posts";
 import { getCommentsByPostId } from "@/lib/api/comments";
 import { ArticleContent } from "@/components/public/ArticleContent";
 import { TableOfContents, extractHeadings } from "@/components/public/TableOfContents";
@@ -16,8 +15,6 @@ import { PostCard } from "@/components/public/PostCard";
 import { ReadingProgressBar } from "@/components/public/ReadingProgressBar";
 import { formatDate, formatCompactNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-import { DeleteConfirmModal } from "@/components/ui/DeleteConfirmModal";
-import { useToast } from "@/components/ui/Toast";
 
 export function ArticleReader({
   slug,
@@ -31,59 +28,6 @@ export function ArticleReader({
   const [comments, setComments] = React.useState<Comment[]>([]);
   const [relatedPosts, setRelatedPosts] = React.useState<Post[]>([]);
   const [loading, setLoading] = React.useState(!initialPost);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
-
-  const router = useRouter();
-  const { toast } = useToast();
-
-  React.useEffect(() => {
-    const resolveArticle = async () => {
-      try {
-        const currentPost = await getPostBySlug(slug);
-        if (currentPost) {
-          setPost(currentPost);
-          setViews(currentPost.views || 1);
-          incrementPostView(currentPost.id).then((newViews) => {
-            if (newViews > 0) setViews(newViews);
-          });
-
-          const [cmts, related] = await Promise.all([
-            getCommentsByPostId(currentPost.id),
-            getPosts({ categorySlug: currentPost.category.slug, limit: 3 }),
-          ]);
-          setComments(cmts);
-          setRelatedPosts(related.filter((p) => p.id !== currentPost?.id).slice(0, 2));
-        }
-      } catch {}
-      setLoading(false);
-    };
-
-    resolveArticle();
-  }, [slug]);
-
-  const handleDeleteConfirm = async () => {
-    if (!post) return;
-    setIsDeleting(true);
-    try {
-      await deletePost(post.id);
-      toast({
-        title: "Article Deleted",
-        description: `"${post.title}" has been permanently removed.`,
-        type: "info",
-      });
-      setIsDeleteModalOpen(false);
-      router.push("/dashboard/posts");
-    } catch {
-      toast({
-        title: "Delete Failed",
-        description: "Could not delete article. Please try again.",
-        type: "error",
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -271,20 +215,13 @@ export function ArticleReader({
                 </p>
                 <div className="pt-2 flex flex-wrap items-center gap-4 text-xs">
                   <a
-                    href="https://wa.me/233240000000"
+                    href="https://wa.me/233559689849"
                     target="_blank"
                     rel="noreferrer"
                     className="font-bold text-[#128C7E] dark:text-[#25D366] hover:underline inline-flex items-center gap-1"
                   >
-                    Send Khophi a thought on WhatsApp →
+                    Send Khophi a thought on WhatsApp (0559689849) →
                   </a>
-                  <button
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="text-xs text-rose-500 hover:text-rose-700 font-semibold flex items-center gap-1 ml-auto"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    <span>Delete Story</span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -339,16 +276,6 @@ export function ArticleReader({
           </section>
         )}
       </article>
-
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Published Story"
-        itemTitle={post.title}
-        isDeleting={isDeleting}
-      />
     </>
   );
 }
