@@ -80,36 +80,60 @@ export interface GetPostsParams {
 }
 
 export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
-  let serverPosts: Post[] | null = null;
-  if (typeof window !== "undefined") {
+  // Server-side: Query server DB directly to guarantee fresh disk data for SSR and all network devices!
+  if (typeof window === "undefined") {
     try {
-      const queryParams = new URLSearchParams();
-      if (params.status) queryParams.set("status", params.status);
-      if (params.categorySlug) queryParams.set("categorySlug", params.categorySlug);
-      if (params.tagSlug) queryParams.set("tagSlug", params.tagSlug);
-      if (params.query) queryParams.set("query", params.query);
-      if (params.limit) queryParams.set("limit", params.limit.toString());
-
-      const res = await fetch(`/api/posts?${queryParams.toString()}`);
-      if (res.ok) {
-        const apiPosts = await res.json();
-        if (Array.isArray(apiPosts) && apiPosts.length > 0) {
-          serverPosts = apiPosts.map((p: any) => ({
-            ...p,
-            coverImage: resolveCoverImage(p.coverImage, p.content),
-          }));
-        }
-      }
-    } catch {}
+      const { db } = await import("@/lib/server/db");
+      const posts = db.getPosts({
+        status: params.status,
+        categorySlug: params.categorySlug,
+        tagSlug: params.tagSlug,
+        query: params.query,
+        limit: params.limit,
+      });
+      return posts.map((p) => ({
+        ...p,
+        coverImage: resolveCoverImage(p.coverImage, p.content),
+      }));
+    } catch {
+      return [];
+    }
   }
+
+  // Client-side: Fetch live REST API with cache-busting headers
+  let serverPosts: Post[] | null = null;
+  try {
+    const queryParams = new URLSearchParams();
+    if (params.status) queryParams.set("status", params.status);
+    if (params.categorySlug) queryParams.set("categorySlug", params.categorySlug);
+    if (params.tagSlug) queryParams.set("tagSlug", params.tagSlug);
+    if (params.query) queryParams.set("query", params.query);
+    if (params.limit) queryParams.set("limit", params.limit.toString());
+    queryParams.set("_t", Date.now().toString());
+
+    const res = await fetch(`/api/posts?${queryParams.toString()}`, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+      },
+    });
+    if (res.ok) {
+      const apiPosts = await res.json();
+      if (Array.isArray(apiPosts)) {
+        serverPosts = apiPosts.map((p: any) => ({
+          ...p,
+          coverImage: resolveCoverImage(p.coverImage, p.content),
+        }));
+      }
+    }
+  } catch {}
 
   const localPosts = getStoredPosts();
   const mergedMap = new Map<string, Post>();
 
-  // Add local posts first
   localPosts.forEach((p) => mergedMap.set(p.id, p));
 
-  // Overlay server posts (freshest server data)
   if (serverPosts) {
     serverPosts.forEach((p) => mergedMap.set(p.id, p));
   }
@@ -160,20 +184,38 @@ export async function getPosts(params: GetPostsParams = {}): Promise<Post[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") {
     try {
-      const res = await fetch(`/api/posts/${encodeURIComponent(slug)}`);
-      if (res.ok) {
-        const item = await res.json();
-        if (item && !item.error && item.title) {
-          return {
-            ...item,
-            coverImage: resolveCoverImage(item.coverImage, item.content),
-          };
-        }
-      }
-    } catch {}
+      const { db } = await import("@/lib/server/db");
+      const post = db.getPostBySlug(slug) || db.getPostById(slug);
+      if (!post) return null;
+      return {
+        ...post,
+        coverImage: resolveCoverImage(post.coverImage, post.content),
+      };
+    } catch {
+      return null;
+    }
   }
+
+  try {
+    const res = await fetch(`/api/posts/${encodeURIComponent(slug)}?_t=${Date.now()}`, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+      },
+    });
+    if (res.ok) {
+      const item = await res.json();
+      if (item && !item.error && item.title) {
+        return {
+          ...item,
+          coverImage: resolveCoverImage(item.coverImage, item.content),
+        };
+      }
+    }
+  } catch {}
 
   const posts = await getPosts({ status: "all" });
   const post = posts.find((p) => p.slug === slug || p.id === slug);
@@ -181,20 +223,38 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") {
     try {
-      const res = await fetch(`/api/posts/${encodeURIComponent(id)}`);
-      if (res.ok) {
-        const item = await res.json();
-        if (item && !item.error && item.title) {
-          return {
-            ...item,
-            coverImage: resolveCoverImage(item.coverImage, item.content),
-          };
-        }
-      }
-    } catch {}
+      const { db } = await import("@/lib/server/db");
+      const post = db.getPostById(id) || db.getPostBySlug(id);
+      if (!post) return null;
+      return {
+        ...post,
+        coverImage: resolveCoverImage(post.coverImage, post.content),
+      };
+    } catch {
+      return null;
+    }
   }
+
+  try {
+    const res = await fetch(`/api/posts/${encodeURIComponent(id)}?_t=${Date.now()}`, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+      },
+    });
+    if (res.ok) {
+      const item = await res.json();
+      if (item && !item.error && item.title) {
+        return {
+          ...item,
+          coverImage: resolveCoverImage(item.coverImage, item.content),
+        };
+      }
+    }
+  } catch {}
 
   const posts = await getPosts({ status: "all" });
   const post = posts.find((p) => p.id === id || p.slug === id);
@@ -202,8 +262,8 @@ export async function getPostById(id: string): Promise<Post | null> {
 }
 
 export async function getFeaturedPosts(): Promise<Post[]> {
-  const posts = getStoredPosts();
-  return posts.filter((p) => p.featured && p.status === "published");
+  const posts = await getPosts({ status: "published" });
+  return posts.filter((p) => p.featured || p.status === "published");
 }
 
 export async function createPost(input: CreatePostInput): Promise<Post> {
